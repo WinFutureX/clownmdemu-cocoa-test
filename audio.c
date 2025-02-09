@@ -24,7 +24,9 @@ void stream_callback(void * data, AudioQueueRef queue, AudioQueueBufferRef buffe
 
 void mixer_callback(void * data, const MIXER_FORMAT * samples, size_t frames)
 {
-	// apparently in pal mode, this can be called a second time with frames set to 0???
+	// in pal mode, this is called several times with frames set to 0 for some reason???
+	// we'll ignore such cases so the audio queue callback won't be fed an empty buffer
+	// thus we'll get working audio output under pal mode just like ntsc
 	if (frames > 0)
 	{
 		audio * a = (audio *) data;
