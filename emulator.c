@@ -39,12 +39,7 @@ void emulator_callback_scanline_render(void * const data, const cc_u16f scanline
 cc_bool emulator_callback_input_request(void * const data, const cc_u8f player, const ClownMDEmu_Button button)
 {
 	emulator * e = (emulator *) data;
-	cc_bool ret = cc_false;
-	if (player == 0) // only first controller supported
-	{
-		ret = e->buttons_p1[button];
-	}
-	return ret;
+	return e->buttons[player][button];
 }
 
 void emulator_callback_fm_generate(void * const data, const struct ClownMDEmu * clownmdemu, size_t frames, void (generate_fm_audio(const struct ClownMDEmu * clownmdemu, cc_s16l * sample_buffer, size_t total_frames)))
@@ -212,10 +207,9 @@ emulator * emulator_alloc()
 	return ret;
 }
 
-void emulator_cartridge_load(emulator * emu, uint8_t * rom, int size)
+void emulator_cartridge_insert(emulator * emu, uint8_t * rom, int size)
 {
-	memset(emu->rom_buffer, 0, sizeof(emu->rom_buffer));
-	memcpy(emu->rom_buffer, rom, size);
+	emu->rom_buffer = rom;
 	emu->rom_size = size;
 	emu->has_cartridge = cc_true;
 	emu->pal = emu->rom_buffer[0x1F0] == 'E' ? cc_true : cc_false;

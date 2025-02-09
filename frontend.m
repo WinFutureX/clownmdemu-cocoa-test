@@ -17,7 +17,6 @@
 	}
 	frontend_log("frontend init @ %p\n", self);
 	shutdown = NO;
-	hasCartridge = NO;
 	// set up window
 	NSRect screenRect = [[NSScreen mainScreen] frame];
 	NSRect viewRect = NSMakeRect(0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT);
@@ -50,7 +49,6 @@
 	[mainMenu addItem:resetMenuItem];
 	[mainMenu addItem:quitMenuItem];
 	[menuBarItem setSubmenu:mainMenu];
-	logEnabled = NO;
 	romFile = [NSData data];
 }
 
@@ -60,7 +58,7 @@
 	if (argc_copy > 1)
 	{
 		NSString * fileName = [NSString stringWithUTF8String:argv_copy[1]];
-		[self loadCartridge:fileName];
+		[self insertCartridge:fileName];
 	}
 	[NSThread detachNewThreadSelector:@selector(iterate:) toTarget:self withObject:nil];
 }
@@ -73,7 +71,7 @@
 - (void) applicationWillTerminate : (NSNotification *) notification
 {
 	shutdown = YES;
-	while (shutdown == YES) sleep(0); // wait
+	while (shutdown == YES) sleep(0); // wait for iterator thread to stop
 	// release objects
 	emulator_shutdown(emu);
 	frontend_log("frontend stopped\n");
@@ -84,6 +82,7 @@
 	emulator_soft_reset(emu);
 }
 
+// iterator thread
 - (void) iterate : (id) sender
 {
 	NSAutoreleasePool *pool = [NSAutoreleasePool new];
@@ -163,12 +162,12 @@
 		NSArray * files = [openDialog filenames];
 #pragma clang diagnostic pop
 		NSString * fileName = [files objectAtIndex:0];
-		[self loadCartridge:fileName];
+		[self insertCartridge:fileName];
 	}
 	if (wasPaused == NO) [self togglePause:nil];
 }
 
-- (void) loadCartridge : (NSString *) fileName
+- (void) insertCartridge : (NSString *) fileName
 {
 	frontend_log("file name: %s\n", [fileName UTF8String]);
 	if ([[NSFileManager defaultManager] fileExistsAtPath:fileName isDirectory:NULL] == NO)
@@ -193,8 +192,7 @@
 		{
 			NSUInteger size = [romFile length];
 			[romFile getBytes:romBuffer length:size];
-			emulator_cartridge_load(emu, romBuffer, size);
-			emu->has_cartridge = cc_true;
+			emulator_cartridge_insert(emu, romBuffer, size);
 			timeDelta = emu->pal == cc_true ? CLOWNMDEMU_DIVIDE_BY_PAL_FRAMERATE(SECOND_NS) : CLOWNMDEMU_DIVIDE_BY_NTSC_FRAMERATE(SECOND_NS);
 		}
 	}

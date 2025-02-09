@@ -7,7 +7,6 @@
 {
 	parent = (frontend *) data;
 #if FRONTEND_OPENGL == 1
-	//frontend_log("graphics: opengl\n");
 	NSOpenGLPixelFormatAttribute attr[] =
 	{
 		NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersionLegacy,
@@ -22,7 +21,6 @@
 	self = [super initWithFrame:frame pixelFormat:format];
 	[[self openGLContext] makeCurrentContext];
 #else
-	//frontend_log("graphics: quartz\n");
 	self = [super initWithFrame:frame];
 #endif
 	return self;
@@ -81,53 +79,47 @@
 	return YES;
 }
 
-- (void) dealloc
-{
-	[super dealloc];
-	frontend_log("view stopping\n");
-}
-
 - (void) keyDown : (NSEvent *) event
 {
 	if ([event isARepeat] == NO)
 	{
 		switch ([event keyCode])
 		{
-			case 0:
-				parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_A] = cc_true;
+			case 0: // a
+				parent->emu->buttons[0][CLOWNMDEMU_BUTTON_A] = cc_true;
 				break;
-			case 1:
-				parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_B] = cc_true;
+			case 1: // s
+				parent->emu->buttons[0][CLOWNMDEMU_BUTTON_B] = cc_true;
 				break;
-			case 2:
-				parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_C] = cc_true;
+			case 2: // d
+				parent->emu->buttons[0][CLOWNMDEMU_BUTTON_C] = cc_true;
 				break;
-			case 3:
-				parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_MODE] = cc_true;
+			case 3: // f
+				parent->emu->buttons[0][CLOWNMDEMU_BUTTON_MODE] = cc_true;
 				break;
-			case 12:
-				parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_X] = cc_true;
+			case 12: // q
+				parent->emu->buttons[0][CLOWNMDEMU_BUTTON_X] = cc_true;
 				break;
-			case 13:
-				parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_Y] = cc_true;
+			case 13: // w
+				parent->emu->buttons[0][CLOWNMDEMU_BUTTON_Y] = cc_true;
 				break;
-			case 14:
-				parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_Z]= cc_true;
+			case 14: // e
+				parent->emu->buttons[0][CLOWNMDEMU_BUTTON_Z]= cc_true;
 				break;
-			case 36:
-				parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_START] = cc_true;
+			case 36: // return
+				parent->emu->buttons[0][CLOWNMDEMU_BUTTON_START] = cc_true;
 				break;
-			case 123:
-				parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_LEFT] = cc_true;
+			case 123: // left
+				parent->emu->buttons[0][CLOWNMDEMU_BUTTON_LEFT] = cc_true;
 				break;
-			case 124:
-				parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_RIGHT] = cc_true;
+			case 124: // right
+				parent->emu->buttons[0][CLOWNMDEMU_BUTTON_RIGHT] = cc_true;
 				break;
-			case 125:
-				parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_DOWN] = cc_true;
+			case 125: // down
+				parent->emu->buttons[0][CLOWNMDEMU_BUTTON_DOWN] = cc_true;
 				break;
-			case 126:
-				parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_UP] = cc_true;
+			case 126: // up
+				parent->emu->buttons[0][CLOWNMDEMU_BUTTON_UP] = cc_true;
 				break;
 			default:
 				frontend_log("view keyDown unknown %d\n", [event keyCode]);
@@ -141,41 +133,41 @@
 {
 	switch ([event keyCode])
 	{
-		case 0:
-			parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_A] = cc_false;
+		case 0: // a
+			parent->emu->buttons[0][CLOWNMDEMU_BUTTON_A] = cc_false;
 			break;
-		case 1:
-			parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_B] = cc_false;
+		case 1: // s
+			parent->emu->buttons[0][CLOWNMDEMU_BUTTON_B] = cc_false;
 			break;
-		case 2:
-			parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_C] = cc_false;
+		case 2: // d
+			parent->emu->buttons[0][CLOWNMDEMU_BUTTON_C] = cc_false;
 			break;
-		case 3:
-			parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_MODE] = cc_false;
+		case 3: // f
+			parent->emu->buttons[0][CLOWNMDEMU_BUTTON_MODE] = cc_false;
 			break;
-		case 12:
-			parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_X] = cc_false;
+		case 12: // q
+			parent->emu->buttons[0][CLOWNMDEMU_BUTTON_X] = cc_false;
 			break;
-		case 13:
-			parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_Y] = cc_false;
+		case 13: // w
+			parent->emu->buttons[0][CLOWNMDEMU_BUTTON_Y] = cc_false;
 			break;
-		case 14:
-			parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_Z]= cc_false;
+		case 14: // e
+			parent->emu->buttons[0][CLOWNMDEMU_BUTTON_Z]= cc_false;
 			break;
-		case 36:
-			parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_START] = cc_false;
+		case 36: // return
+			parent->emu->buttons[0][CLOWNMDEMU_BUTTON_START] = cc_false;
 			break;
-		case 123:
-			parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_LEFT] = cc_false;
+		case 123: // left
+			parent->emu->buttons[0][CLOWNMDEMU_BUTTON_LEFT] = cc_false;
 			break;
-		case 124:
-			parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_RIGHT] = cc_false;
+		case 124: // right
+			parent->emu->buttons[0][CLOWNMDEMU_BUTTON_RIGHT] = cc_false;
 			break;
-		case 125:
-			parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_DOWN] = cc_false;
+		case 125: // down
+			parent->emu->buttons[0][CLOWNMDEMU_BUTTON_DOWN] = cc_false;
 			break;
-		case 126:
-			parent->emu->buttons_p1[CLOWNMDEMU_BUTTON_UP] = cc_false;
+		case 126: // up
+			parent->emu->buttons[0][CLOWNMDEMU_BUTTON_UP] = cc_false;
 			break;
 		default:
 			frontend_log("view keyUp unknown %d\n", [event keyCode]);

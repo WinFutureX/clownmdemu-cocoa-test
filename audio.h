@@ -12,6 +12,7 @@ typedef struct audio
 	Mixer_Constant constant;
 	Mixer_State state;
 	Mixer mixer;
+	cc_bool shutdown;
 	cc_bool done;
 	cc_bool pal;
 	cc_bool has_mixer;

@@ -21,15 +21,14 @@
 
 typedef struct emulator
 {
-	uint8_t rom_buffer[MAX_FILE_SIZE];
+	uint8_t * rom_buffer;
 	int rom_size;
 	uint32_t colors[TOTAL_COLORS * TOTAL_PALETTES * TOTAL_BRIGHTNESS_LEVELS];
 	uint32_t display[SCREEN_WIDTH * SCREEN_HEIGHT];
 	unsigned int width;
 	unsigned int height;
 	audio * audio_output;
-	cc_bool buttons_p1[CLOWNMDEMU_BUTTON_MAX];
-	cc_bool buttons_p2[CLOWNMDEMU_BUTTON_MAX];
+	cc_bool buttons[2][CLOWNMDEMU_BUTTON_MAX];
 	ClownMDEmu_Configuration configuration;
 	ClownMDEmu_Constant constant;
 	ClownMDEmu_State state;
@@ -65,7 +64,7 @@ cc_bool emulator_callback_save_file_size_obtain(void * const data, const char * 
 void emulator_callback_log(void * const data, const char * fmt, va_list args);
 
 emulator * emulator_alloc();
-void emulator_cartridge_load(emulator * emu, uint8_t * rom, int size);
+void emulator_cartridge_insert(emulator * emu, uint8_t * rom, int size);
 void emulator_soft_reset(emulator * emu);
 void emulator_hard_reset(emulator * emu);
 void emulator_update(emulator * emu);

@@ -17,14 +17,12 @@ char **argv_copy;
 	NSView *view;
 	BOOL shutdown;
 	BOOL paused;
-	BOOL hasCartridge;
 	NSData * romFile;
 	int romSize;
 	uint8_t romBuffer[MAX_FILE_SIZE];
 	uint64_t timeDelta;
 @public
 	emulator * emu;
-	BOOL logEnabled;
 	NSView *frontendView;
 	int currentWidth;
 	int currentHeight;
@@ -36,6 +34,6 @@ char **argv_copy;
 - (void) togglePause : (NSMenuItem *) sender;
 - (void) toggleLogEnabled : (NSMenuItem *) sender;
 - (void) openFile : (NSMenuItem *) sender;
-- (void) loadCartridge : (NSString *) fileName;
+- (void) insertCartridge : (NSString *) fileName;
 @end
 #endif
