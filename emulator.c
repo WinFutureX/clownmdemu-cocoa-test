@@ -40,7 +40,7 @@ cc_bool emulator_callback_input_request(void * const data, const cc_u8f player, 
 {
 	emulator * e = (emulator *) data;
 	cc_bool ret = cc_false;
-	if (player == 0)
+	if (player == 0) // only first controller supported
 	{
 		ret = e->buttons_p1[button];
 	}
@@ -83,26 +83,31 @@ void emulator_callback_cd_sector_read(void * const data, cc_u16l * buf)
 
 cc_bool emulator_callback_cd_seek_track(void * const data, const cc_u16f idx, const ClownMDEmu_CDDAMode mode)
 {
+	// unimplemented
 	return cc_false;
 }
 
 size_t emulator_callback_cd_audio_read(void * const data, cc_s16l * const buf, const size_t frames)
 {
+	// unimplemented
 	return 0;
 }
 
 cc_bool emulator_callback_save_file_open_read(void * const data, const char * const filename)
 {
+	// unimplemented
 	return cc_false;
 }
 
 cc_s16f emulator_callback_save_file_read(void * const data)
 {
+	// unimplemented
 	return 0;
 }
 
 cc_bool emulator_callback_save_file_open_write(void * const data, const char * const filename)
 {
+	// unimplemented
 	return cc_false;
 }
 
@@ -118,11 +123,13 @@ void emulator_callback_save_file_close(void * const data)
 
 cc_bool emulator_callback_save_file_remove(void * const data, const char * const filename)
 {
+	// unimplemented
 	return cc_false;
 }
 
 cc_bool emulator_callback_save_file_size_obtain(void * const data, const char * const filename, size_t * const size)
 {
+	// unimplemented
 	return cc_false;
 }
 
