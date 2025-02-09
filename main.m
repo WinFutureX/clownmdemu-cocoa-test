@@ -2,7 +2,6 @@
 #include "emulator.h"
 #include "frontend.h"
 #include "frontend_log.h"
-//#include "timer.h"
 
 int main(int argc, char **argv)
 {
