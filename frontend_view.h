@@ -4,10 +4,10 @@
 #define GL_SILENCE_DEPRECATION
 
 #include <Cocoa/Cocoa.h>
-#include <OpenGL/gl.h>
 #include "frontend.h"
 
 #if FRONTEND_OPENGL == 1
+#include <OpenGL/gl.h>
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 @interface view : NSOpenGLView <NSWindowDelegate>
