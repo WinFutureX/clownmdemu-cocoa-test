@@ -199,7 +199,7 @@ emulator * emulator_alloc()
 		ret->audio_output = audio_alloc();
 		if (!ret->audio_output)
 		{
-			frontend_log("audio_alloc() failed\n");
+			frontend_err("emulator_alloc: audio_alloc() failed\n");
 			free(ret);
 			ret = NULL;
 		}

@@ -12,7 +12,7 @@
 	emu = emulator_alloc();
 	if (!emu)
 	{
-		frontend_log("emulator_alloc() failed\n");
+		frontend_err("emulator_alloc() failed\n");
 		exit(1);
 	}
 	frontend_log("frontend init @ %p\n", self);
@@ -172,22 +172,22 @@
 	frontend_log("file name: %s\n", [fileName UTF8String]);
 	if ([[NSFileManager defaultManager] fileExistsAtPath:fileName isDirectory:NULL] == NO)
 	{
-		frontend_log("file %s does not exist\n", [fileName UTF8String]);
+		frontend_err("file %s does not exist\n", [fileName UTF8String]);
 		return;
 	}
 	NSDictionary * attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:fileName error:nil];
 	if (attributes == nil)
 	{
-		frontend_log("unable to obtain attributes of file %s\n", [fileName UTF8String]);
+		frontend_err("unable to obtain attributes of file %s\n", [fileName UTF8String]);
 		return;
 	}
 	unsigned long long fileSize = [attributes fileSize];
 	frontend_log("file size: %u bytes\n", fileSize);
-	if (fileSize < 260) frontend_log("file size is less than 260 bytes\n");
+	if (fileSize < 260) frontend_err("file size is less than 260 bytes\n");
 	else if (fileSize <= MAX_FILE_SIZE)
 	{
 		romFile = [NSData dataWithContentsOfFile:fileName];
-		if (!romFile) frontend_log("unable to open file!\n");
+		if (!romFile) frontend_err("unable to open file!\n");
 		else
 		{
 			NSUInteger size = [romFile length];
@@ -196,6 +196,6 @@
 			timeDelta = emu->pal == cc_true ? CLOWNMDEMU_DIVIDE_BY_PAL_FRAMERATE(SECOND_NS) : CLOWNMDEMU_DIVIDE_BY_NTSC_FRAMERATE(SECOND_NS);
 		}
 	}
-	else frontend_log("file size exceeds 4MB\n");
+	else frontend_err("file size exceeds 4MB\n");
 }
 @end

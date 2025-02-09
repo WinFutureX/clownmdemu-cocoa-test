@@ -122,7 +122,7 @@
 				parent->emu->buttons[0][CLOWNMDEMU_BUTTON_UP] = cc_true;
 				break;
 			default:
-				frontend_log("view keyDown unknown %d\n", [event keyCode]);
+				frontend_err("view keyDown unknown %d\n", [event keyCode]);
 				[super keyDown:event];
 				break;
 		}
@@ -170,7 +170,7 @@
 			parent->emu->buttons[0][CLOWNMDEMU_BUTTON_UP] = cc_false;
 			break;
 		default:
-			frontend_log("view keyUp unknown %d\n", [event keyCode]);
+			frontend_err("view keyUp unknown %d\n", [event keyCode]);
 			[super keyUp:event];
 			break;
 	}
