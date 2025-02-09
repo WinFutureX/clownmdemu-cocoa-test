@@ -2,7 +2,6 @@
 #include "frontend_view.h"
 #include "frontend_log.h"
 #include "emulator.h"
-#include <QuartzCore/CVDisplayLink.h>
 #include <CoreServices/CoreServices.h>
 #include <mach/mach_time.h>
 
