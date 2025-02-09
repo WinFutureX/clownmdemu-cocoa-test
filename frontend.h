@@ -13,7 +13,6 @@
 #define SECOND_NS 1000000000
 
 #define FRONTEND_OPENGL 1
-#define FRONTEND_EMULATOR_LOG 1
 
 int argc_copy;
 char **argv_copy;

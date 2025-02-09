@@ -50,7 +50,7 @@ FRONTEND_OBJ =  frontend.o \
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clownmdemu: $(EMU_CD_OBJ) $(EMU_SND_OBJ) $(EMU_CORE_OBJ) $(FRONTEND_OBJ)
-	$(CC) $(CFLAGS) -framework Cocoa -framework QuartzCore -framework OpenGL -framework AudioUnit -framework CoreAudio -framework AudioToolBox $^ -o $@
+	$(CC) $(CFLAGS) -framework Cocoa -framework OpenGL -framework AudioToolBox $^ -o $@
 
 clean:
 	$(RM) *.o clownmdemu-frontend-common/{,clowncd/{,audio/},clownresampler/,core/{,clown68000/{common,interpreter}/}}*.o clownmdemu
