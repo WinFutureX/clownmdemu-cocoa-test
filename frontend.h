@@ -1,14 +1,8 @@
 #ifndef FRONTEND_H
 #define FRONTEND_H
 #include <Cocoa/Cocoa.h>
-//#include "callbacks.h"
 #include "clownmdemu-frontend-common/core/clowncommon/clowncommon.h"
-#include "audio.h"
 #include "emulator.h"
-//#include "input.h"
-
-#define HZ_NS_NTSC 16683350 // 59.94 hz
-#define HZ_NS_PAL 20000000 // 50 hz
 
 #define SECOND_NS 1000000000
 
