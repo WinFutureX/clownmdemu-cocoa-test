@@ -24,7 +24,8 @@ void stream_callback(void * data, AudioQueueRef queue, AudioQueueBufferRef buffe
 
 void mixer_callback(void * data, const MIXER_FORMAT * samples, size_t frames)
 {
-	if (frames > 0) // apparently in pal mode, frames can be 0???
+	// apparently in pal mode, this can be called a second time with frames set to 0???
+	if (frames > 0)
 	{
 		audio * a = (audio *) data;
 		MIXER_FORMAT * output = &a->samples[0];
