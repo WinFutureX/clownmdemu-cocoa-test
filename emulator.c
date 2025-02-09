@@ -9,7 +9,7 @@ cc_u8f emulator_callback_cartridge_read(void * const data, const cc_u32f addr)
 
 void emulator_callback_cartridge_write(void * const data, const cc_u32f addr, const cc_u8f val)
 {
-	//
+	// unimplemented
 }
 
 void emulator_callback_color_update(void * const data, const cc_u16f idx, const cc_u16f color)
@@ -73,12 +73,12 @@ void emulator_callback_cdda_generate(void * const data, const struct ClownMDEmu 
 
 void emulator_callback_cd_seek(void * const data, const cc_u32f idx)
 {
-	//
+	// unimplemented
 }
 
 void emulator_callback_cd_sector_read(void * const data, cc_u16l * buf)
 {
-	//
+	// unimplemented
 }
 
 cc_bool emulator_callback_cd_seek_track(void * const data, const cc_u16f idx, const ClownMDEmu_CDDAMode mode)
@@ -108,12 +108,12 @@ cc_bool emulator_callback_save_file_open_write(void * const data, const char * c
 
 void emulator_callback_save_file_write(void * const data, const cc_u8f byte)
 {
-	//
+	// unimplemented
 }
 
 void emulator_callback_save_file_close(void * const data)
 {
-	//
+	// unimplemented
 }
 
 cc_bool emulator_callback_save_file_remove(void * const data, const char * const filename)
