@@ -8,7 +8,7 @@
 @implementation frontend
 - (void) applicationWillFinishLaunching : (NSNotification *) notification
 {
-	emu = emulator_alloc();
+	emu = emulator_alloc(self);
 	if (!emu)
 	{
 		frontend_err("emulator_alloc() failed\n");
@@ -196,5 +196,10 @@
 		}
 	}
 	else frontend_err("file size exceeds 4MB\n");
+}
+
+- (void) bridge
+{
+	frontend_log("hello from bridge\n");
 }
 @end

@@ -1,5 +1,6 @@
 #include "emulator.h"
 #include "frontend_log.h"
+#include "frontend_bridge.h"
 
 cc_u8f emulator_callback_cartridge_read(void * const data, const cc_u32f addr)
 {
@@ -10,6 +11,11 @@ cc_u8f emulator_callback_cartridge_read(void * const data, const cc_u32f addr)
 void emulator_callback_cartridge_write(void * const data, const cc_u32f addr, const cc_u8f val)
 {
 	// unimplemented
+	// any attempt to write to rom will call the bridge function instead
+	// so we can test the c-objc frontend bridging
+	// plus the official frontends don't really use this callback anyway
+	emulator * e = (emulator *) data;
+	frontend_bridge_func(e->user_data);
 }
 
 void emulator_callback_color_update(void * const data, const cc_u16f idx, const cc_u16f color)
@@ -19,7 +25,7 @@ void emulator_callback_color_update(void * const data, const cc_u16f idx, const 
 	const cc_u32f r = color & 0xF;
 	const cc_u32f g = color >> 4 & 0xF;
 	const cc_u32f b = color >> 8 & 0xF;
-	// recompose into BGRA8888
+	// recombine into BGRA8888
 	e->colors[idx] = 0xFF | (r << 8) | (r << 12) | (g << 16) | (g << 20) | (b << 24) | (b << 28);
 }
 
@@ -139,11 +145,12 @@ void emulator_callback_log(void * const data, const char * fmt, va_list args)
 	}
 }
 
-emulator * emulator_alloc()
+emulator * emulator_alloc(void * data)
 {
 	emulator * ret = calloc(1, sizeof(emulator));
 	if (ret)
 	{
+		ret->user_data = data; // required to call objc frontend methods
 		// emulator core
 		ClownMDEmu_Parameters_Initialise(&ret->clownmdemu, &ret->configuration, &ret->constant, &ret->state, &ret->callbacks);
 		ret->callbacks.user_data = ret;

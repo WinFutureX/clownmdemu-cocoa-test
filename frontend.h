@@ -35,5 +35,6 @@ char **argv_copy;
 - (void) toggleLogEnabled : (NSMenuItem *) sender;
 - (void) openFile : (NSMenuItem *) sender;
 - (void) insertCartridge : (NSString *) fileName;
+- (void) bridge;
 @end
 #endif

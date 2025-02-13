@@ -42,6 +42,7 @@ EMU_CORE_OBJ=clownmdemu-frontend-common/core/bus-common.o \
 FRONTEND_OBJ =  frontend.o \
 		frontend_log.o \
 		frontend_view.o \
+		frontend_bridge.o \
 		emulator.o \
 		audio.o \
 		main.o
