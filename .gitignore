@@ -1,9 +1,2 @@
 /clownmdemu
-*.o
-clownmdemu-frontend-common/clowncd/*.o
-clownmdemu-frontend-common/clowncd/audio/*.o
-clownmdemu-frontend-common/clownresampler/*.o
-clownmdemu-frontend-common/core/*.o
-clownmdemu-frontend-common/core/clown68000/common/*.o
-clownmdemu-frontend-common/core/clown68000/interpreter/*.o
-clownmdemu-frontend-common/*.o
+obj/
