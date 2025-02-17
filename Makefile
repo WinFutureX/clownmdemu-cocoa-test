@@ -1,45 +1,46 @@
+OBJDIR=obj
 CC=clang
 CFLAGS=-Iclownmdemu-frontend-common -Iclownmdemu-frontend-common/clownresampler -Iclownmdemu-frontend-common/core -Iclownmdemu-frontend-common/core/clowncommon -Iclownmdemu-frontend-common/core/clown68000/common/clowncommon -g3 -Og
 
-EMU_CD_OBJ=clownmdemu-frontend-common/cd-reader.o \
-	clownmdemu-frontend-common/clowncd/audio.o \
-	clownmdemu-frontend-common/clowncd/clowncd.o \
-	clownmdemu-frontend-common/clowncd/cue.o \
-	clownmdemu-frontend-common/clowncd/error.o \
-	clownmdemu-frontend-common/clowncd/file-io.o \
-	clownmdemu-frontend-common/clowncd/utilities.o \
-	clownmdemu-frontend-common/clowncd/audio/flac.o \
-	clownmdemu-frontend-common/clowncd/audio/mp3.o \
-	clownmdemu-frontend-common/clowncd/audio/vorbis.o \
-	clownmdemu-frontend-common/clowncd/audio/wav.o
+EMU_CD_OBJS =	cd-reader.o \
+		$(addprefix clowncd/, audio.o \
+		clowncd.o \
+		cue.o \
+		error.o \
+		file-io.o \
+		utilities.o \
+		$(addprefix audio/, flac.o \
+		mp3.o \
+		vorbis.o \
+		wav.o))
 
-EMU_SND_OBJ=clownmdemu-frontend-common/clownresampler/clownresampler.o
+EMU_SND_OBJS =	$(addprefix clownresampler/, clownresampler.o)
 
-EMU_CORE_OBJ=clownmdemu-frontend-common/core/bus-common.o \
-	clownmdemu-frontend-common/core/log.o \
-	clownmdemu-frontend-common/core/bus-z80.o \
-	clownmdemu-frontend-common/core/controller.o \
-	clownmdemu-frontend-common/core/fm-phase.o \
-	clownmdemu-frontend-common/core/clown68000/interpreter/clown68000.o \
-	clownmdemu-frontend-common/core/clown68000/common/opcode.o \
-	clownmdemu-frontend-common/core/pcm.o \
-	clownmdemu-frontend-common/core/z80.o \
-	clownmdemu-frontend-common/core/clownmdemu.o \
-	clownmdemu-frontend-common/core/vdp.o \
-	clownmdemu-frontend-common/core/bus-main-m68k.o \
-	clownmdemu-frontend-common/core/fm-operator.o \
-	clownmdemu-frontend-common/core/psg.o \
-	clownmdemu-frontend-common/core/fm.o \
-	clownmdemu-frontend-common/core/fm-channel.o \
-	clownmdemu-frontend-common/core/fm-lfo.o \
-	clownmdemu-frontend-common/core/fm-operator.o \
-	clownmdemu-frontend-common/core/fm-phase.o \
-	clownmdemu-frontend-common/core/bus-sub-m68k.o \
-	clownmdemu-frontend-common/core/io-port.o \
-	clownmdemu-frontend-common/core/cdc.o \
-	clownmdemu-frontend-common/core/cdda.o
+EMU_CORE_OBJS =	$(addprefix core/, bus-common.o \
+		log.o \
+		bus-z80.o \
+		controller.o \
+		fm-phase.o \
+		pcm.o \
+		z80.o \
+		clownmdemu.o \
+		vdp.o \
+		bus-main-m68k.o \
+		fm-operator.o \
+		psg.o \
+		fm.o \
+		fm-channel.o \
+		fm-lfo.o \
+		fm-operator.o \
+		fm-phase.o \
+		bus-sub-m68k.o \
+		io-port.o \
+		cdc.o \
+		cdda.o \
+		$(addprefix clown68000/interpreter/, clown68000.o) \
+		$(addprefix clown68000/common/, opcode.o))
 
-FRONTEND_OBJ =  frontend.o \
+FRONTEND_OBJS =	frontend.o \
 		frontend_log.o \
 		frontend_view.o \
 		frontend_bridge.o \
@@ -47,11 +48,21 @@ FRONTEND_OBJ =  frontend.o \
 		audio.o \
 		main.o
 
-%.o: %.c %.m
+ALL_OBJS =	$(addprefix clownmdemu-frontend-common/, $(EMU_CD_OBJS) $(EMU_SND_OBJS) $(EMU_CORE_OBJS)) $(FRONTEND_OBJS)
+
+all: clownmdemu
+
+clownmdemu: $(ALL_OBJS:%.o=$(OBJDIR)/%.o)
+	$(CC) $(CFLAGS) -framework Cocoa -framework OpenGL -framework AudioToolbox $^ -o $@
+
+$(OBJDIR)/%.o: %.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-clownmdemu: $(EMU_CD_OBJ) $(EMU_SND_OBJ) $(EMU_CORE_OBJ) $(FRONTEND_OBJ)
-	$(CC) $(CFLAGS) -framework Cocoa -framework OpenGL -framework AudioToolBox $^ -o $@
+$(OBJDIR)/%.o: %.m | $(OBJDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJDIR):
+	mkdir -p $(OBJDIR)/clownmdemu-frontend-common/{,clowncd/{,audio/},clownresampler/,core/{,clown68000/{common,interpreter}/}}
 
 clean:
-	$(RM) *.o clownmdemu-frontend-common/{,clowncd/{,audio/},clownresampler/,core/{,clown68000/{common,interpreter}/}}*.o clownmdemu
+	$(RM) -r $(OBJDIR) clownmdemu
