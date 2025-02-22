@@ -195,7 +195,7 @@
 			timeDelta = emu->pal == cc_true ? CLOWNMDEMU_DIVIDE_BY_PAL_FRAMERATE(SECOND_NS) : CLOWNMDEMU_DIVIDE_BY_NTSC_FRAMERATE(SECOND_NS);
 		}
 	}
-	else frontend_err("file size exceeds 4MB\n");
+	else frontend_err("file size exceeds 8MB\n");
 }
 
 - (void) bridge

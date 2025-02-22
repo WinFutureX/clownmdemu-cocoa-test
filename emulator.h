@@ -7,7 +7,7 @@
 
 #include "audio.h"
 
-#define MAX_FILE_SIZE 4194304
+#define MAX_FILE_SIZE 8388608
 
 #define TOTAL_COLORS 16
 #define TOTAL_PALETTES 4
