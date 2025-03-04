@@ -2,6 +2,7 @@
 #define EMULATOR_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "clownmdemu-frontend-common/core/clownmdemu.h"
 

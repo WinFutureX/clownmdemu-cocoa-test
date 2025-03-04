@@ -15,7 +15,7 @@ void emulator_callback_cartridge_write(void * const data, const cc_u32f addr, co
 	// so we can test the c-objc frontend bridging
 	// plus the official frontends don't really use this callback anyway
 	emulator * e = (emulator *) data;
-	frontend_bridge_func(e->user_data);
+	frontend_bridge_cartridge_write(e->user_data, addr, val);
 }
 
 void emulator_callback_color_update(void * const data, const cc_u16f idx, const cc_u16f color)

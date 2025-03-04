@@ -1,3 +1,4 @@
+#include <stdint.h>
 #define MIXER_IMPLEMENTATION
 #include "audio.h"
 #include "frontend_log.h"

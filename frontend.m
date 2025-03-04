@@ -198,8 +198,9 @@
 	else frontend_err("file size exceeds 8MB\n");
 }
 
-- (void) bridge
+- (void) cartridgeWrite : (uint32_t) addr val : (uint8_t) val
 {
-	frontend_log("hello from bridge\n");
+	// doesn't actually do anything
+	frontend_log("attempted write to cartridge at address 0x%x, value 0x%x\n", addr, val); // not necessarily an error condition?
 }
 @end
