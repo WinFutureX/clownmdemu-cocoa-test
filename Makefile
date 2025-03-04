@@ -1,6 +1,5 @@
 OBJDIR=obj
-CC=clang
-CFLAGS=-Iclownmdemu-frontend-common -Iclownmdemu-frontend-common/clownresampler -Iclownmdemu-frontend-common/core -Iclownmdemu-frontend-common/core/clowncommon -Iclownmdemu-frontend-common/core/clown68000/common/clowncommon -g3 -Og
+CFLAGS=-std=c99 -g3 -Og
 
 EMU_CD_OBJS =	cd-reader.o \
 		$(addprefix clowncd/, audio.o \
