@@ -118,7 +118,7 @@ void audio_initialize(audio * a, cc_bool pal)
 	if (a->has_queue == cc_true) audio_queue_shutdown(a);
 	if (a->has_mixer == cc_true) Mixer_State_Deinitialise(&a->state);
 	a->pal = pal;
-	a->has_mixer = Mixer_State_Initialise(&a->state, 48000, a->pal, cc_true) == cc_true ? cc_true : cc_false;
+	a->has_mixer = Mixer_State_Initialise(&a->state, 48000, a->pal) == cc_true ? cc_true : cc_false;
 	a->has_queue = audio_queue_initialize(a, pal);
 	a->shutdown = cc_false;
 }
