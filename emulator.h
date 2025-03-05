@@ -29,7 +29,7 @@ typedef struct emulator
 	uint32_t display[SCREEN_WIDTH * SCREEN_HEIGHT];
 	unsigned int width;
 	unsigned int height;
-	audio * audio_output;
+	audio audio_output;
 	cc_bool buttons[2][CLOWNMDEMU_BUTTON_MAX];
 	ClownMDEmu_Configuration configuration;
 	ClownMDEmu_Constant constant;
@@ -65,7 +65,7 @@ cc_bool emulator_callback_save_file_remove(void * const data, const char * const
 cc_bool emulator_callback_save_file_size_obtain(void * const data, const char * const filename, size_t * const size);
 void emulator_callback_log(void * const data, const char * fmt, va_list args);
 
-emulator * emulator_alloc(void * data);
+void emulator_initialize(emulator * emu, void * data);
 void emulator_cartridge_insert(emulator * emu, uint8_t * rom, int size);
 void emulator_soft_reset(emulator * emu);
 void emulator_hard_reset(emulator * emu);

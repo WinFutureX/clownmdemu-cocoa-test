@@ -29,11 +29,11 @@ MIXER_FORMAT * mixer_allocate_psg(Mixer * mixer, size_t frames);
 MIXER_FORMAT * mixer_allocate_pcm(Mixer * mixer, size_t frames);
 MIXER_FORMAT * mixer_allocate_cdda(Mixer * mixer, size_t frames);
 
-audio * audio_alloc();
+void audio_initialize(audio * a);
 cc_bool audio_queue_initialize(audio * a, cc_bool pal);
-void audio_initialize(audio * a, cc_bool pal);
-void audio_begin(audio * a);
-void audio_end(audio * a);
+void audio_mixer_initialize(audio * a, cc_bool pal);
+void audio_mixer_begin(audio * a);
+void audio_mixer_end(audio * a);
 void audio_queue_shutdown(audio * a);
 void audio_shutdown(audio * a);
 

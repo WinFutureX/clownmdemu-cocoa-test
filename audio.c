@@ -65,18 +65,13 @@ MIXER_FORMAT * mixer_allocate_cdda(Mixer * mixer, size_t frames)
 
 #define NUM_AUDIO_QUEUE_BUFFERS 4
 
-audio * audio_alloc()
+void audio_initialize(audio * a)
 {
-	audio * ret = calloc(1, sizeof(audio));
-	if (ret)
-	{
-		// required to initialize mixer properly
-		ret->mixer = (Mixer) {&ret->constant, &ret->state};
-		Mixer_Constant_Initialise(&ret->constant);
-		ret->has_mixer = cc_false;
-		ret->has_queue = cc_false;
-	}
-	return ret;
+	// required to initialize mixer properly
+	a->mixer = (Mixer) {&a->constant, &a->state};
+	Mixer_Constant_Initialise(&a->constant);
+	a->has_mixer = cc_false;
+	a->has_queue = cc_false;
 }
 
 cc_bool audio_queue_initialize(audio * a, cc_bool pal)
@@ -113,7 +108,7 @@ cc_bool audio_queue_initialize(audio * a, cc_bool pal)
 	return ret;
 }
 
-void audio_initialize(audio * a, cc_bool pal)
+void audio_mixer_initialize(audio * a, cc_bool pal)
 {
 	if (a->has_queue == cc_true) audio_queue_shutdown(a);
 	if (a->has_mixer == cc_true) Mixer_State_Deinitialise(&a->state);
@@ -123,12 +118,12 @@ void audio_initialize(audio * a, cc_bool pal)
 	a->shutdown = cc_false;
 }
 
-void audio_begin(audio * a)
+void audio_mixer_begin(audio * a)
 {
 	if (a->has_mixer == cc_true) Mixer_Begin(&a->mixer);
 }
 
-void audio_end(audio * a)
+void audio_mixer_end(audio * a)
 {
 	if (a->has_mixer == cc_true) Mixer_End(&a->mixer, 1, 1, mixer_callback, a);
 }
@@ -148,5 +143,4 @@ void audio_shutdown(audio * a)
 	if (a->has_queue == cc_true) audio_queue_shutdown(a);
 	Mixer_State_Deinitialise(&a->state);
 	a->has_mixer = cc_false;
-	free(a);
 }

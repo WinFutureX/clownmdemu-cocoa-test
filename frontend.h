@@ -22,7 +22,7 @@ char **argv_copy;
 	uint8_t romBuffer[MAX_FILE_SIZE];
 	uint64_t timeDelta;
 @public
-	emulator * emu;
+	emulator emu;
 	NSView *frontendView;
 	int currentWidth;
 	int currentHeight;

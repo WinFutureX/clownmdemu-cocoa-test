@@ -51,25 +51,25 @@ cc_bool emulator_callback_input_request(void * const data, const cc_u8f player, 
 void emulator_callback_fm_generate(void * const data, const struct ClownMDEmu * clownmdemu, size_t frames, void (generate_fm_audio(const struct ClownMDEmu * clownmdemu, cc_s16l * sample_buffer, size_t total_frames)))
 {
 	emulator * e = (emulator *) data;
-	generate_fm_audio(clownmdemu, mixer_allocate_fm(&e->audio_output->mixer, frames), frames);
+	generate_fm_audio(clownmdemu, mixer_allocate_fm(&e->audio_output.mixer, frames), frames);
 }
 
 void emulator_callback_psg_generate(void * const data, const struct ClownMDEmu * clownmdemu, size_t samples, void (generate_psg_audio(const struct ClownMDEmu * clownmdemu, cc_s16l * sample_buffer, size_t total_samples)))
 {
 	emulator * e = (emulator *) data;
-	generate_psg_audio(clownmdemu, mixer_allocate_psg(&e->audio_output->mixer, samples), samples);
+	generate_psg_audio(clownmdemu, mixer_allocate_psg(&e->audio_output.mixer, samples), samples);
 }
 
 void emulator_callback_pcm_generate(void * const data, const struct ClownMDEmu * clownmdemu, size_t frames, void (generate_pcm_audio(const struct ClownMDEmu * clownmdemu, cc_s16l * sample_buffer, size_t total_frames)))
 {
 	emulator * e = (emulator *) data;
-	generate_pcm_audio(clownmdemu, mixer_allocate_pcm(&e->audio_output->mixer, frames), frames);
+	generate_pcm_audio(clownmdemu, mixer_allocate_pcm(&e->audio_output.mixer, frames), frames);
 }
 
 void emulator_callback_cdda_generate(void * const data, const struct ClownMDEmu * clownmdemu, size_t frames, void (generate_cdda_audio(const struct ClownMDEmu * clownmdemu, cc_s16l * sample_buffer, size_t total_frames)))
 {
 	emulator * e = (emulator *) data;
-	generate_cdda_audio(clownmdemu, mixer_allocate_cdda(&e->audio_output->mixer, frames), frames);
+	generate_cdda_audio(clownmdemu, mixer_allocate_cdda(&e->audio_output.mixer, frames), frames);
 }
 
 void emulator_callback_cd_seek(void * const data, const cc_u32f idx)
@@ -145,73 +145,62 @@ void emulator_callback_log(void * const data, const char * fmt, va_list args)
 	}
 }
 
-emulator * emulator_alloc(void * data)
+void emulator_initialize(emulator * emu, void * data)
 {
-	emulator * ret = calloc(1, sizeof(emulator));
-	if (ret)
-	{
-		ret->user_data = data; // required to call objc frontend methods
-		// emulator core
-		ClownMDEmu_Parameters_Initialise(&ret->clownmdemu, &ret->configuration, &ret->constant, &ret->state, &ret->callbacks);
-		ret->callbacks.user_data = ret;
-		ret->callbacks.cartridge_read = emulator_callback_cartridge_read;
-		ret->callbacks.cartridge_written = emulator_callback_cartridge_write;
-		ret->callbacks.colour_updated = emulator_callback_color_update;
-		ret->callbacks.scanline_rendered = emulator_callback_scanline_render;
-		ret->callbacks.input_requested = emulator_callback_input_request;
-		ret->callbacks.fm_audio_to_be_generated = emulator_callback_fm_generate;
-		ret->callbacks.psg_audio_to_be_generated = emulator_callback_psg_generate;
-		ret->callbacks.pcm_audio_to_be_generated = emulator_callback_pcm_generate;
-		ret->callbacks.cdda_audio_to_be_generated = emulator_callback_cdda_generate;
-		ret->callbacks.cd_seeked = emulator_callback_cd_seek;
-		ret->callbacks.cd_sector_read = emulator_callback_cd_sector_read;
-		ret->callbacks.cd_track_seeked = emulator_callback_cd_seek_track;
-		ret->callbacks.cd_audio_read = emulator_callback_cd_audio_read;
-		ret->callbacks.save_file_opened_for_reading = emulator_callback_save_file_open_read;
-		ret->callbacks.save_file_read = emulator_callback_save_file_read;
-		ret->callbacks.save_file_opened_for_writing = emulator_callback_save_file_open_write;
-		ret->callbacks.save_file_written = emulator_callback_save_file_write;
-		ret->callbacks.save_file_closed = emulator_callback_save_file_close;
-		ret->callbacks.save_file_removed = emulator_callback_save_file_remove;
-		ret->callbacks.save_file_size_obtained = emulator_callback_save_file_size_obtain;
-		ret->configuration.general.region = CLOWNMDEMU_REGION_OVERSEAS; // to be set by cartridge loader
-		ret->configuration.general.tv_standard = CLOWNMDEMU_TV_STANDARD_NTSC; // to be set by cartridge loader
-		ret->configuration.vdp.sprites_disabled       = cc_false;
-		ret->configuration.vdp.window_disabled        = cc_false;
-		ret->configuration.vdp.planes_disabled[0]     = cc_false;
-		ret->configuration.vdp.planes_disabled[1]     = cc_false;
-		ret->configuration.fm.fm_channels_disabled[0] = cc_false;
-		ret->configuration.fm.fm_channels_disabled[1] = cc_false;
-		ret->configuration.fm.fm_channels_disabled[2] = cc_false;
-		ret->configuration.fm.fm_channels_disabled[3] = cc_false;
-		ret->configuration.fm.fm_channels_disabled[4] = cc_false;
-		ret->configuration.fm.fm_channels_disabled[5] = cc_false;
-		ret->configuration.fm.dac_channel_disabled    = cc_false;
-		ret->configuration.psg.tone_disabled[0]       = cc_false;
-		ret->configuration.psg.tone_disabled[1]       = cc_false;
-		ret->configuration.psg.tone_disabled[2]       = cc_false;
-		ret->configuration.psg.noise_disabled         = cc_false;
-		ret->configuration.pcm.channels_disabled[0]   = cc_false;
-		ret->configuration.pcm.channels_disabled[1]   = cc_false;
-		ret->configuration.pcm.channels_disabled[2]   = cc_false;
-		ret->configuration.pcm.channels_disabled[3]   = cc_false;
-		ret->configuration.pcm.channels_disabled[4]   = cc_false;
-		ret->configuration.pcm.channels_disabled[5]   = cc_false;
-		ret->configuration.pcm.channels_disabled[6]   = cc_false;
-		ret->configuration.pcm.channels_disabled[7]   = cc_false;
-		ClownMDEmu_SetLogCallback(emulator_callback_log, ret);
-		ClownMDEmu_Constant_Initialise(&ret->constant);
-		ClownMDEmu_State_Initialise(&ret->state);
-		// audio engine
-		ret->audio_output = audio_alloc();
-		if (!ret->audio_output)
-		{
-			frontend_err("emulator_alloc: audio_alloc() failed\n");
-			free(ret);
-			ret = NULL;
-		}
-	}
-	return ret;
+	emu->user_data = data; // required to call objc frontend methods
+	// emulator core
+	ClownMDEmu_Parameters_Initialise(&emu->clownmdemu, &emu->configuration, &emu->constant, &emu->state, &emu->callbacks);
+	emu->callbacks.user_data = emu;
+	emu->callbacks.cartridge_read = emulator_callback_cartridge_read;
+	emu->callbacks.cartridge_written = emulator_callback_cartridge_write;
+	emu->callbacks.colour_updated = emulator_callback_color_update;
+	emu->callbacks.scanline_rendered = emulator_callback_scanline_render;
+	emu->callbacks.input_requested = emulator_callback_input_request;
+	emu->callbacks.fm_audio_to_be_generated = emulator_callback_fm_generate;
+	emu->callbacks.psg_audio_to_be_generated = emulator_callback_psg_generate;
+	emu->callbacks.pcm_audio_to_be_generated = emulator_callback_pcm_generate;
+	emu->callbacks.cdda_audio_to_be_generated = emulator_callback_cdda_generate;
+	emu->callbacks.cd_seeked = emulator_callback_cd_seek;
+	emu->callbacks.cd_sector_read = emulator_callback_cd_sector_read;
+	emu->callbacks.cd_track_seeked = emulator_callback_cd_seek_track;
+	emu->callbacks.cd_audio_read = emulator_callback_cd_audio_read;
+	emu->callbacks.save_file_opened_for_reading = emulator_callback_save_file_open_read;
+	emu->callbacks.save_file_read = emulator_callback_save_file_read;
+	emu->callbacks.save_file_opened_for_writing = emulator_callback_save_file_open_write;
+	emu->callbacks.save_file_written = emulator_callback_save_file_write;
+	emu->callbacks.save_file_closed = emulator_callback_save_file_close;
+	emu->callbacks.save_file_removed = emulator_callback_save_file_remove;
+	emu->callbacks.save_file_size_obtained = emulator_callback_save_file_size_obtain;
+	emu->configuration.general.region = CLOWNMDEMU_REGION_OVERSEAS; // to be set by cartridge loader
+	emu->configuration.general.tv_standard = CLOWNMDEMU_TV_STANDARD_NTSC; // to be set by cartridge loader
+	emu->configuration.vdp.sprites_disabled       = cc_false;
+	emu->configuration.vdp.window_disabled        = cc_false;
+	emu->configuration.vdp.planes_disabled[0]     = cc_false;
+	emu->configuration.vdp.planes_disabled[1]     = cc_false;
+	emu->configuration.fm.fm_channels_disabled[0] = cc_false;
+	emu->configuration.fm.fm_channels_disabled[1] = cc_false;
+	emu->configuration.fm.fm_channels_disabled[2] = cc_false;
+	emu->configuration.fm.fm_channels_disabled[3] = cc_false;
+	emu->configuration.fm.fm_channels_disabled[4] = cc_false;
+	emu->configuration.fm.fm_channels_disabled[5] = cc_false;
+	emu->configuration.fm.dac_channel_disabled    = cc_false;
+	emu->configuration.psg.tone_disabled[0]       = cc_false;
+	emu->configuration.psg.tone_disabled[1]       = cc_false;
+	emu->configuration.psg.tone_disabled[2]       = cc_false;
+	emu->configuration.psg.noise_disabled         = cc_false;
+	emu->configuration.pcm.channels_disabled[0]   = cc_false;
+	emu->configuration.pcm.channels_disabled[1]   = cc_false;
+	emu->configuration.pcm.channels_disabled[2]   = cc_false;
+	emu->configuration.pcm.channels_disabled[3]   = cc_false;
+	emu->configuration.pcm.channels_disabled[4]   = cc_false;
+	emu->configuration.pcm.channels_disabled[5]   = cc_false;
+	emu->configuration.pcm.channels_disabled[6]   = cc_false;
+	emu->configuration.pcm.channels_disabled[7]   = cc_false;
+	ClownMDEmu_SetLogCallback(emulator_callback_log, emu);
+	ClownMDEmu_Constant_Initialise(&emu->constant);
+	ClownMDEmu_State_Initialise(&emu->state);
+	// audio engine
+	audio_initialize(&emu->audio_output);
 }
 
 void emulator_cartridge_insert(emulator * emu, uint8_t * rom, int size)
@@ -224,7 +213,7 @@ void emulator_cartridge_insert(emulator * emu, uint8_t * rom, int size)
 	emu->configuration.general.region = emu->overseas == cc_true ? CLOWNMDEMU_REGION_OVERSEAS : CLOWNMDEMU_REGION_DOMESTIC;
 	emu->configuration.general.tv_standard = emu->pal == cc_true ? CLOWNMDEMU_TV_STANDARD_PAL : CLOWNMDEMU_TV_STANDARD_NTSC;
 	emulator_hard_reset(emu);
-	audio_initialize(emu->audio_output, emu->pal);
+	audio_mixer_initialize(&emu->audio_output, emu->pal);
 }
 
 void emulator_soft_reset(emulator * emu)
@@ -241,13 +230,12 @@ void emulator_hard_reset(emulator * emu)
 
 void emulator_update(emulator * emu)
 {
-	audio_begin(emu->audio_output);
+	audio_mixer_begin(&emu->audio_output);
 	ClownMDEmu_Iterate(&emu->clownmdemu);
-	audio_end(emu->audio_output);
+	audio_mixer_end(&emu->audio_output);
 }
 
 void emulator_shutdown(emulator * emu)
 {
-	audio_shutdown(emu->audio_output);
-	free(emu);
+	audio_shutdown(&emu->audio_output);
 }

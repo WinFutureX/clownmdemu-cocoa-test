@@ -8,12 +8,7 @@
 @implementation frontend
 - (void) applicationWillFinishLaunching : (NSNotification *) notification
 {
-	emu = emulator_alloc(self);
-	if (!emu)
-	{
-		frontend_err("emulator_alloc() failed\n");
-		exit(1);
-	}
+	emulator_initialize(&emu, self);
 	frontend_log("frontend init @ %p\n", self);
 	shutdown = NO;
 	// set up window
@@ -72,13 +67,13 @@
 	shutdown = YES;
 	while (shutdown == YES) sleep(0); // wait for iterator thread to stop
 	// release objects
-	emulator_shutdown(emu);
+	emulator_shutdown(&emu);
 	frontend_log("frontend stopped\n");
 }
 
 - (void) reset : (NSMenuItem *) sender
 {
-	emulator_soft_reset(emu);
+	emulator_soft_reset(&emu);
 }
 
 // iterator thread
@@ -86,12 +81,12 @@
 {
 	NSAutoreleasePool *pool = [NSAutoreleasePool new];
 	paused = NO;
-	uint64_t next_time;
+	static uint64_t next_time;
 	struct timeval tv = {0, 100};
 	for (;;)
 	{
 		if (shutdown == YES) break;
-		if (emu->has_cartridge == cc_true)
+		if (emu.has_cartridge == cc_true)
 		{
 			if (paused == NO)
 			{
@@ -107,7 +102,7 @@
 					// if massively delayed, resynchronize to avoid fast forwarding
 					if (current_time >= next_time + SECOND_NS / 10) next_time = current_time;
 					next_time += timeDelta;
-					emulator_update(emu);
+					emulator_update(&emu);
 					[self performSelectorOnMainThread:@selector(display:) withObject:nil waitUntilDone:NO];
 				}
 			}
@@ -127,7 +122,7 @@
 - (void) togglePause : (NSMenuItem *) sender
 {
 	paused = (paused == YES ? NO : YES);
-	emu->audio_output->paused = paused == YES ? cc_true : cc_false;
+	emu.audio_output.paused = paused == YES ? cc_true : cc_false;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 	[sender setState:(paused == YES ? NSOnState : NSOffState)];
@@ -136,10 +131,10 @@
 
 - (void) toggleLogEnabled : (NSMenuItem *) sender
 {
-	emu->log_enabled = emu->log_enabled == cc_true ? cc_false : cc_true;
+	emu.log_enabled = emu.log_enabled == cc_true ? cc_false : cc_true;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-	[sender setState:emu->log_enabled == YES ? NSOnState : NSOffState];
+	[sender setState:emu.log_enabled == YES ? NSOnState : NSOffState];
 #pragma clang diagnostic pop
 }
 
@@ -191,8 +186,8 @@
 		{
 			NSUInteger size = [romFile length];
 			[romFile getBytes:romBuffer length:size];
-			emulator_cartridge_insert(emu, romBuffer, size);
-			timeDelta = emu->pal == cc_true ? CLOWNMDEMU_DIVIDE_BY_PAL_FRAMERATE(SECOND_NS) : CLOWNMDEMU_DIVIDE_BY_NTSC_FRAMERATE(SECOND_NS);
+			emulator_cartridge_insert(&emu, romBuffer, size);
+			timeDelta = emu.pal == cc_true ? CLOWNMDEMU_DIVIDE_BY_PAL_FRAMERATE(SECOND_NS) : CLOWNMDEMU_DIVIDE_BY_NTSC_FRAMERATE(SECOND_NS);
 		}
 	}
 	else frontend_err("file size exceeds 8MB\n");
