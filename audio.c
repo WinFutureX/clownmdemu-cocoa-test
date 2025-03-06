@@ -9,7 +9,7 @@ void audio_queue_callback(void * data, AudioQueueRef queue, AudioQueueBufferRef 
 	if (a->shutdown == cc_true) return;
 	MIXER_FORMAT * source = &a->samples[0];
 	uint8_t * target = buffer->mAudioData;
-	if (a->paused == cc_true || a->done == cc_true)
+	if (a->paused == cc_true || a->done == cc_true || a->bytes == 0)
 	{
 		memset(target, 0, buffer->mAudioDataBytesCapacity);
 		buffer->mAudioDataByteSize = buffer->mAudioDataBytesCapacity;
