@@ -5,7 +5,7 @@
 cc_u8f emulator_callback_cartridge_read(void * const data, const cc_u32f addr)
 {
 	emulator * e = (emulator *) data;
-	return addr <= e->rom_size ? e->rom_buffer[addr] : 0;
+	return addr < e->rom_size ? e->rom_buffer[addr] : 0;
 }
 
 void emulator_callback_cartridge_write(void * const data, const cc_u32f addr, const cc_u8f val)
@@ -103,7 +103,7 @@ cc_bool emulator_callback_save_file_open_read(void * const data, const char * co
 cc_s16f emulator_callback_save_file_read(void * const data)
 {
 	// unimplemented
-	return 0;
+	return -1;
 }
 
 cc_bool emulator_callback_save_file_open_write(void * const data, const char * const filename)
