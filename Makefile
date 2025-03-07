@@ -1,5 +1,6 @@
 OBJDIR = obj
-CFLAGS = -std=c99 -g3 -Og
+OPT := -g3 -Og
+CFLAGS = -std=c99 $(OPT)
 
 EMU_CD_OBJS = cd-reader.o \
 	$(addprefix clowncd/, audio.o \
