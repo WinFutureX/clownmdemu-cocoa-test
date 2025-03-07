@@ -1,5 +1,5 @@
 # clownmdemu-cocoa-test
-A very minimal (and broken) Mac native frontend implementation for [Clownacy's ClownMDEmu Mega Drive emulator](https://github.com/Clownacy/clownmdemu-core).
+A very minimal (and broken) Mac native frontend implementation of [Clownacy's ClownMDEmu Mega Drive emulator](https://github.com/Clownacy/clownmdemu-core).
 
 This is just a hobby project that I might work on from time to time, so don't expect any serious developments.
 
