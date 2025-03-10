@@ -1,5 +1,9 @@
 OBJDIR = obj
+ifeq ($(DEBUG), y)
 OPT := -g3 -Og
+else
+OPT := -O2
+endif
 CFLAGS = -std=c99 $(OPT)
 
 EMU_CD_OBJS = cd-reader.o \
