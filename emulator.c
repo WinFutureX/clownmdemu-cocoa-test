@@ -34,9 +34,9 @@ void emulator_callback_scanline_render(void * const data, const cc_u16f scanline
 	emulator * e = (emulator *) data;
 	e->width = width;
 	e->height = height;
-	const uint8_t * input = pixels;
-	uint32_t * output = &e->display[scanline * width];
-	for (int i = 0; i < width; ++i)
+	const uint8_t * input = pixels + left_boundary;
+	uint32_t * output = &e->display[scanline * width + left_boundary];
+	for (int i = left_boundary; i < right_boundary; ++i)
 	{
 		*output++ = e->colors[*input++];
 	}
