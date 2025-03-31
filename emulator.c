@@ -29,7 +29,7 @@ void emulator_callback_color_update(void * const data, const cc_u16f idx, const 
 	e->colors[idx] = 0xFF | (r << 8) | (r << 12) | (g << 16) | (g << 20) | (b << 24) | (b << 28);
 }
 
-void emulator_callback_scanline_render(void * const data, const cc_u16f scanline, const cc_u8l * const pixels, const cc_u16f width, const cc_u16f height)
+void emulator_callback_scanline_render(void * const data, const cc_u16f scanline, const cc_u8l * const pixels, const cc_u16f left_boundary, const cc_u16f right_boundary, const cc_u16f width, const cc_u16f height)
 {
 	emulator * e = (emulator *) data;
 	e->width = width;

@@ -46,7 +46,7 @@ emulator;
 cc_u8f emulator_callback_cartridge_read(void * const data, const cc_u32f addr);
 void emulator_callback_cartridge_write(void * const data, const cc_u32f addr, const cc_u8f val);
 void emulator_callback_color_update(void * const data, const cc_u16f idx, const cc_u16f color);
-void emulator_callback_scanline_render(void * const data, const cc_u16f scanline, const cc_u8l * const pixels, const cc_u16f width, const cc_u16f height);
+void emulator_callback_scanline_render(void * const data, const cc_u16f scanline, const cc_u8l * const pixels, const cc_u16f left_boundary, const cc_u16f right_boundary, const cc_u16f width, const cc_u16f height);
 cc_bool emulator_callback_input_request(void * const data, const cc_u8f player, const ClownMDEmu_Button button);
 void emulator_callback_fm_generate(void * const data, const struct ClownMDEmu * clownmdemu, size_t frames, void (generate_fm_audio(const struct ClownMDEmu * clownmdemu, cc_s16l * sample_buffer, size_t total_frames)));
 void emulator_callback_psg_generate(void * const data, const struct ClownMDEmu * clownmdemu, size_t samples, void (generate_psg_audio(const struct ClownMDEmu * clownmdemu, cc_s16l * sample_buffer, size_t total_samples)));
