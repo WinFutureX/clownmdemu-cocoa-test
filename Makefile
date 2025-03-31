@@ -1,5 +1,5 @@
 OBJDIR = obj
-ifeq ($(DEBUG), y)
+ifeq ($(DEBUG), $(filter $(DEBUG), 1 y))
 OPT := -g3 -Og
 else
 OPT := -O2
