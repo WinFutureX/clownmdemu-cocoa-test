@@ -6,7 +6,10 @@
 - (id) initWithFrame : (NSRect) frame data : (void *) data;
 {
 	parent = (frontend *) data;
-#if FRONTEND_OPENGL == 1
+#ifdef FRONTEND_NO_OPENGL
+	frontend_log("quartz\n");
+	self = [super initWithFrame:frame];
+#else
 	NSOpenGLPixelFormatAttribute attr[] =
 	{
 		NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersionLegacy,
@@ -20,26 +23,13 @@
 	NSOpenGLPixelFormat *format = [[NSOpenGLPixelFormat alloc] initWithAttributes:attr];
 	self = [super initWithFrame:frame pixelFormat:format];
 	[[self openGLContext] makeCurrentContext];
-#else
-	self = [super initWithFrame:frame];
 #endif
 	return self;
 }
 
 - (void) drawRect : (NSRect) dirtyRect
 {
-#if FRONTEND_OPENGL == 1
-	[super drawRect:dirtyRect];
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glRasterPos2f(-1, 1);
-	if (parent->emu.width != 0 || parent->emu.height != 0)
-	{
-		glPixelZoom((SCREEN_WIDTH_F * 2) / (float) parent->emu.width, -(SCREEN_HEIGHT_F / (float) parent->emu.height));
-		glDrawPixels(parent->emu.width, parent->emu.height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8, parent->emu.display);
-	}
-	[[self openGLContext] flushBuffer];
-#else
+#ifdef FRONTEND_NO_OPENGL
 	// slower quartz 2d implementation
 	if (parent->emu.width == 0 || parent->emu.height == 0) return;
 #pragma clang diagnostic push
@@ -56,6 +46,17 @@
 	CGColorSpaceRelease(colorspace);
 	CGDataProviderRelease(provider);
 	CGImageRelease(rgbImageRef);
+#else
+	[super drawRect:dirtyRect];
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glRasterPos2f(-1, 1);
+	if (parent->emu.width != 0 || parent->emu.height != 0)
+	{
+		glPixelZoom((SCREEN_WIDTH_F * 2) / (float) parent->emu.width, -(SCREEN_HEIGHT_F / (float) parent->emu.height));
+		glDrawPixels(parent->emu.width, parent->emu.height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8, parent->emu.display);
+	}
+	[[self openGLContext] flushBuffer];
 #endif
 }
 

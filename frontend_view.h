@@ -6,14 +6,14 @@
 #include <Cocoa/Cocoa.h>
 #include "frontend.h"
 
-#if FRONTEND_OPENGL == 1
+#ifdef FRONTEND_NO_OPENGL
+@interface view : NSView <NSWindowDelegate>
+#else
 #include <OpenGL/gl.h>
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 @interface view : NSOpenGLView <NSWindowDelegate>
 #pragma clang diagnostic pop
-#else
-@interface view : NSView <NSWindowDelegate>
 #endif
 {
 	frontend * parent;

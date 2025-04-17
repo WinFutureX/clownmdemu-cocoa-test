@@ -1,10 +1,14 @@
 OBJDIR = obj
-ifeq ($(DEBUG), $(filter $(DEBUG), 1 y))
+ifdef DEBUG
 OPT := -g3 -Og
 else
 OPT := -O2
 endif
-CFLAGS = -std=c99 $(OPT)
+CFLAGS := -std=c99 $(OPT)
+
+ifdef FRONTEND_NO_OPENGL
+CFLAGS += -DFRONTEND_NO_OPENGL=y
+endif
 
 EMU_CD_OBJS = cd-reader.o \
 	$(addprefix clowncd/, audio.o \
