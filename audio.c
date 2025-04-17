@@ -24,12 +24,13 @@ void audio_queue_callback(void * data, AudioQueueRef queue, AudioQueueBufferRef 
 	if (err) frontend_err("audio_queue_callback: AudioQueueEnqueueBuffer returned %d\n", err);
 }
 
+// 3732 frames for 60hz, 4433 for 50hz
 void mixer_callback(void * data, const MIXER_FORMAT * samples, size_t frames)
 {
 	// in pal mode, this is called several times with frames set to 0 for some reason???
 	// we'll ignore such cases so the audio queue callback won't be fed an empty buffer
 	// thus we'll get working audio output under pal mode just like ntsc
-	if (frames > 0)
+	if (frames > 0 || frames <= MIXER_MAXIMUM_AUDIO_FRAMES_PER_FRAME)
 	{
 		audio * a = (audio *) data;
 		MIXER_FORMAT * output = &a->samples[0];
@@ -43,22 +44,22 @@ void mixer_callback(void * data, const MIXER_FORMAT * samples, size_t frames)
 	}
 }
 
-MIXER_FORMAT * mixer_allocate_fm(Mixer * mixer, size_t frames)
+MIXER_FORMAT * mixer_allocate_fm(Mixer_State * mixer, size_t frames)
 {
 	return Mixer_AllocateFMSamples(mixer, frames);
 }
 
-MIXER_FORMAT * mixer_allocate_psg(Mixer * mixer, size_t frames)
+MIXER_FORMAT * mixer_allocate_psg(Mixer_State * mixer, size_t frames)
 {
 	return Mixer_AllocatePSGSamples(mixer, frames);
 }
 
-MIXER_FORMAT * mixer_allocate_pcm(Mixer * mixer, size_t frames)
+MIXER_FORMAT * mixer_allocate_pcm(Mixer_State * mixer, size_t frames)
 {
 	return Mixer_AllocatePCMSamples(mixer, frames);
 }
 
-MIXER_FORMAT * mixer_allocate_cdda(Mixer * mixer, size_t frames)
+MIXER_FORMAT * mixer_allocate_cdda(Mixer_State * mixer, size_t frames)
 {
 	return Mixer_AllocateCDDASamples(mixer, frames);
 }
@@ -67,9 +68,6 @@ MIXER_FORMAT * mixer_allocate_cdda(Mixer * mixer, size_t frames)
 
 void audio_initialize(audio * a)
 {
-	// required to initialize mixer properly
-	a->mixer = (Mixer) {&a->constant, &a->state};
-	Mixer_Constant_Initialise(&a->constant);
 	a->has_mixer = cc_false;
 	a->has_queue = cc_false;
 }
@@ -78,7 +76,7 @@ cc_bool audio_queue_initialize(audio * a, cc_bool pal)
 {
 	cc_bool ret = cc_false;
 	AudioStreamBasicDescription stream_desc;
-	stream_desc.mSampleRate = 48000.0f;
+	stream_desc.mSampleRate = pal == cc_true ? 221650.0f : 223920.0f; // samples * frames
 	stream_desc.mFormatID = kAudioFormatLinearPCM;
 	stream_desc.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
 	stream_desc.mBitsPerChannel = 16;
@@ -89,7 +87,7 @@ cc_bool audio_queue_initialize(audio * a, cc_bool pal)
 	a->queue = 0;
 	OSStatus err = AudioQueueNewOutput(&stream_desc, &audio_queue_callback, a, 0, 0, 0, &a->queue);
 	if (err) frontend_err("audio_queue_initialize: AudioQueueNewOutput failed: %d\n", err);
-	int buffer_size = stream_desc.mBytesPerFrame * (pal == cc_true ? 960 : 800);
+	int buffer_size = stream_desc.mBytesPerFrame * MIXER_MAXIMUM_AUDIO_FRAMES_PER_FRAME;
 	AudioQueueBufferRef audio_queue_buffers[NUM_AUDIO_QUEUE_BUFFERS];
 	for (int i = 0; i < NUM_AUDIO_QUEUE_BUFFERS; i++)
 	{
@@ -111,9 +109,9 @@ cc_bool audio_queue_initialize(audio * a, cc_bool pal)
 void audio_mixer_initialize(audio * a, cc_bool pal)
 {
 	if (a->has_queue == cc_true) audio_queue_shutdown(a);
-	if (a->has_mixer == cc_true) Mixer_State_Deinitialise(&a->state);
+	if (a->has_mixer == cc_true) Mixer_Deinitialise(&a->mixer);
 	a->pal = pal;
-	a->has_mixer = Mixer_State_Initialise(&a->state, 48000, a->pal) == cc_true ? cc_true : cc_false;
+	a->has_mixer = Mixer_Initialise(&a->mixer, a->pal) == cc_true ? cc_true : cc_false;
 	a->has_queue = audio_queue_initialize(a, pal);
 	a->shutdown = cc_false;
 }
@@ -125,7 +123,7 @@ void audio_mixer_begin(audio * a)
 
 void audio_mixer_end(audio * a)
 {
-	if (a->has_mixer == cc_true) Mixer_End(&a->mixer, 1, 1, mixer_callback, a);
+	if (a->has_mixer == cc_true) Mixer_End(&a->mixer, mixer_callback, a);
 }
 
 void audio_queue_shutdown(audio * a)
@@ -141,6 +139,6 @@ void audio_queue_shutdown(audio * a)
 void audio_shutdown(audio * a)
 {
 	if (a->has_queue == cc_true) audio_queue_shutdown(a);
-	Mixer_State_Deinitialise(&a->state);
+	Mixer_Deinitialise(&a->mixer);
 	a->has_mixer = cc_false;
 }
