@@ -7,7 +7,6 @@
 {
 	parent = (frontend *) data;
 #ifdef FRONTEND_NO_OPENGL
-	frontend_log("quartz\n");
 	self = [super initWithFrame:frame];
 #else
 	NSOpenGLPixelFormatAttribute attr[] =
