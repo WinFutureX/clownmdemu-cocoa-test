@@ -218,7 +218,7 @@ void emulator_cartridge_insert(emulator * emu, uint8_t * rom, int size)
 
 void emulator_soft_reset(emulator * emu)
 {
-	ClownMDEmu_Reset(&emu->clownmdemu, cc_false);
+	ClownMDEmu_Reset(&emu->clownmdemu, cc_false, emu->rom_size);
 }
 
 void emulator_hard_reset(emulator * emu)
