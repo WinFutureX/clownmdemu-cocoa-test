@@ -1,13 +1,13 @@
 OBJDIR = obj
-ifdef DEBUG
+ifeq ($(DEBUG), $(filter $(DEBUG), 1 y))
 OPT := -g3 -Og
 else
 OPT := -O2
 endif
 CFLAGS := -std=c99 $(OPT)
 
-ifdef FRONTEND_NO_OPENGL
-CFLAGS += -DFRONTEND_NO_OPENGL=y
+ifeq ($(FRONTEND_NO_OPENGL), $(filter $(FRONTEND_NO_OPENGL), 1 y))
+CFLAGS += -DFRONTEND_NO_OPENGL
 endif
 
 EMU_CD_OBJS = cd-reader.o \
