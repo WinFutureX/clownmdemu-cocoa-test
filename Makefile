@@ -1,3 +1,6 @@
+DEBUG ?= 0
+FRONTEND_NO_OPENGL ?= 0
+
 OBJDIR = obj
 ifeq ($(DEBUG), $(filter $(DEBUG), 1 y))
 OPT := -g3 -Og
