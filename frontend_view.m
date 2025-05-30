@@ -1,6 +1,5 @@
 #include "frontend_view.h"
 #include "frontend_log.h"
-#include "emulator.h"
 
 @implementation view
 - (id) initWithFrame : (NSRect) frame data : (void *) data;
@@ -83,95 +82,59 @@
 {
 	if ([event isARepeat] == NO)
 	{
-		switch ([event keyCode])
-		{
-			case 0: // a
-				parent->emu.buttons[0][CLOWNMDEMU_BUTTON_A] = cc_true;
-				break;
-			case 1: // s
-				parent->emu.buttons[0][CLOWNMDEMU_BUTTON_B] = cc_true;
-				break;
-			case 2: // d
-				parent->emu.buttons[0][CLOWNMDEMU_BUTTON_C] = cc_true;
-				break;
-			case 3: // f
-				parent->emu.buttons[0][CLOWNMDEMU_BUTTON_MODE] = cc_true;
-				break;
-			case 12: // q
-				parent->emu.buttons[0][CLOWNMDEMU_BUTTON_X] = cc_true;
-				break;
-			case 13: // w
-				parent->emu.buttons[0][CLOWNMDEMU_BUTTON_Y] = cc_true;
-				break;
-			case 14: // e
-				parent->emu.buttons[0][CLOWNMDEMU_BUTTON_Z]= cc_true;
-				break;
-			case 36: // return
-				parent->emu.buttons[0][CLOWNMDEMU_BUTTON_START] = cc_true;
-				break;
-			case 123: // left
-				parent->emu.buttons[0][CLOWNMDEMU_BUTTON_LEFT] = cc_true;
-				break;
-			case 124: // right
-				parent->emu.buttons[0][CLOWNMDEMU_BUTTON_RIGHT] = cc_true;
-				break;
-			case 125: // down
-				parent->emu.buttons[0][CLOWNMDEMU_BUTTON_DOWN] = cc_true;
-				break;
-			case 126: // up
-				parent->emu.buttons[0][CLOWNMDEMU_BUTTON_UP] = cc_true;
-				break;
-			default:
-				frontend_err("view keyDown unknown %d\n", [event keyCode]);
-				[super keyDown:event];
-				break;
-		}
+		[self handleKeys:event pressed:cc_true];
 	}
 }
 
 - (void) keyUp : (NSEvent *) event
 {
+	[self handleKeys:event pressed:cc_false];
+}
+
+- (void) handleKeys : (NSEvent *) event pressed : (cc_bool) pressed
+{
 	switch ([event keyCode])
 	{
 		case 0: // a
-			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_A] = cc_false;
+			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_A] = pressed;
 			break;
 		case 1: // s
-			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_B] = cc_false;
+			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_B] = pressed;
 			break;
 		case 2: // d
-			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_C] = cc_false;
+			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_C] = pressed;
 			break;
 		case 3: // f
-			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_MODE] = cc_false;
+			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_MODE] = pressed;
 			break;
 		case 12: // q
-			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_X] = cc_false;
+			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_X] = pressed;
 			break;
 		case 13: // w
-			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_Y] = cc_false;
+			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_Y] = pressed;
 			break;
 		case 14: // e
-			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_Z]= cc_false;
+			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_Z]= pressed;
 			break;
 		case 36: // return
-			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_START] = cc_false;
+			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_START] = pressed;
 			break;
 		case 123: // left
-			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_LEFT] = cc_false;
+			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_LEFT] = pressed;
 			break;
 		case 124: // right
-			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_RIGHT] = cc_false;
+			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_RIGHT] = pressed;
 			break;
 		case 125: // down
-			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_DOWN] = cc_false;
+			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_DOWN] = pressed;
 			break;
 		case 126: // up
-			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_UP] = cc_false;
+			parent->emu.buttons[0][CLOWNMDEMU_BUTTON_UP] = pressed;
 			break;
 		default:
-			frontend_err("view keyUp unknown %d\n", [event keyCode]);
-			[super keyUp:event];
+			frontend_err("view %s unknown %d\n", pressed == cc_true ? "keyDown" : "keyUp", [event keyCode]);
+			if (pressed == cc_true) [super keyDown:event];
+			else [super keyUp:event];
 			break;
 	}
 }

@@ -21,5 +21,6 @@
 - (id) initWithFrame : (NSRect) frame data : (void *) data;
 - (void) keyDown : (NSEvent *) event;
 - (void) keyUp : (NSEvent *) event;
+- (void) handleKeys : (NSEvent *) event pressed : (cc_bool) pressed;
 @end
 #endif
