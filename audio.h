@@ -5,7 +5,7 @@
 #include <AudioToolbox/AudioToolbox.h>
 
 #define MIXER_FORMAT cc_s16l
-#include "clownmdemu-frontend-common/mixer.h"
+#include "common/mixer.h"
 
 typedef struct audio
 {

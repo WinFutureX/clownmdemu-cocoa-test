@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "clownmdemu-frontend-common/core/clownmdemu.h"
+#include "common/core/clownmdemu.h"
 
 #include "audio.h"
 

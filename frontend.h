@@ -1,7 +1,7 @@
 #ifndef FRONTEND_H
 #define FRONTEND_H
 #include <Cocoa/Cocoa.h>
-#include "clownmdemu-frontend-common/core/clowncommon/clowncommon.h"
+#include "common/core/clowncommon/clowncommon.h"
 #include "emulator.h"
 
 #define SECOND_NS 1000000000
