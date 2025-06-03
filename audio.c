@@ -7,7 +7,7 @@ void audio_queue_callback(void * data, AudioQueueRef queue, AudioQueueBufferRef 
 {
 	audio * a = (audio *) data;
 	if (a->shutdown == cc_true) return;
-	MIXER_FORMAT * source = &a->samples[0];
+	cc_s16l * source = &a->samples[0];
 	uint8_t * target = buffer->mAudioData;
 	if (a->paused == cc_true || a->done == cc_true || a->bytes == 0)
 	{
@@ -25,7 +25,7 @@ void audio_queue_callback(void * data, AudioQueueRef queue, AudioQueueBufferRef 
 }
 
 // 3732 frames for 60hz, 4433 for 50hz
-void mixer_callback(void * data, const MIXER_FORMAT * samples, size_t frames)
+void mixer_callback(void * data, const cc_s16l * samples, size_t frames)
 {
 	// in pal mode, this is called several times with frames set to 0 for some reason???
 	// we'll ignore such cases so the audio queue callback won't be fed an empty buffer
@@ -33,33 +33,33 @@ void mixer_callback(void * data, const MIXER_FORMAT * samples, size_t frames)
 	if (frames > 0 || frames <= MIXER_MAXIMUM_AUDIO_FRAMES_PER_FRAME)
 	{
 		audio * a = (audio *) data;
-		MIXER_FORMAT * output = &a->samples[0];
+		cc_s16l * output = &a->samples[0];
 		for (int i = 0; i < frames; i++)
 		{
 			*output++ = *samples++;
 			*output++ = *samples++;
 		}
-		a->bytes = sizeof(MIXER_FORMAT) * frames * 2;
+		a->bytes = sizeof(cc_s16l) * frames * 2;
 		a->done = cc_false;
 	}
 }
 
-MIXER_FORMAT * mixer_allocate_fm(Mixer_State * mixer, size_t frames)
+cc_s16l * mixer_allocate_fm(Mixer_State * mixer, size_t frames)
 {
 	return Mixer_AllocateFMSamples(mixer, frames);
 }
 
-MIXER_FORMAT * mixer_allocate_psg(Mixer_State * mixer, size_t frames)
+cc_s16l * mixer_allocate_psg(Mixer_State * mixer, size_t frames)
 {
 	return Mixer_AllocatePSGSamples(mixer, frames);
 }
 
-MIXER_FORMAT * mixer_allocate_pcm(Mixer_State * mixer, size_t frames)
+cc_s16l * mixer_allocate_pcm(Mixer_State * mixer, size_t frames)
 {
 	return Mixer_AllocatePCMSamples(mixer, frames);
 }
 
-MIXER_FORMAT * mixer_allocate_cdda(Mixer_State * mixer, size_t frames)
+cc_s16l * mixer_allocate_cdda(Mixer_State * mixer, size_t frames)
 {
 	return Mixer_AllocateCDDASamples(mixer, frames);
 }

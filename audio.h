@@ -1,10 +1,8 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
-#include <CoreAudio/CoreAudio.h>
 #include <AudioToolbox/AudioToolbox.h>
 
-#define MIXER_FORMAT cc_s16l
 #include "common/mixer.h"
 
 typedef struct audio
@@ -17,15 +15,15 @@ typedef struct audio
 	cc_bool has_queue;
 	cc_bool paused;
 	AudioQueueRef queue;
-	MIXER_FORMAT samples[MIXER_MAXIMUM_AUDIO_FRAMES_PER_FRAME * MIXER_CHANNEL_COUNT];
+	cc_s16l samples[MIXER_MAXIMUM_AUDIO_FRAMES_PER_FRAME * MIXER_CHANNEL_COUNT];
 	unsigned int bytes;
 }
 audio;
 
-MIXER_FORMAT * mixer_allocate_fm(Mixer_State * mixer, size_t frames);
-MIXER_FORMAT * mixer_allocate_psg(Mixer_State * mixer, size_t frames);
-MIXER_FORMAT * mixer_allocate_pcm(Mixer_State * mixer, size_t frames);
-MIXER_FORMAT * mixer_allocate_cdda(Mixer_State * mixer, size_t frames);
+cc_s16l * mixer_allocate_fm(Mixer_State * mixer, size_t frames);
+cc_s16l * mixer_allocate_psg(Mixer_State * mixer, size_t frames);
+cc_s16l * mixer_allocate_pcm(Mixer_State * mixer, size_t frames);
+cc_s16l * mixer_allocate_cdda(Mixer_State * mixer, size_t frames);
 
 void audio_initialize(audio * a);
 cc_bool audio_queue_initialize(audio * a, cc_bool pal);
