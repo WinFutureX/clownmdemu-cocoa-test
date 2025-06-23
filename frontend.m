@@ -13,7 +13,7 @@
 	shutdown = NO;
 	// set up window
 	NSRect screenRect = [[NSScreen mainScreen] frame];
-	NSRect viewRect = NSMakeRect(0, 0, SCREEN_WIDTH * 2, SCREEN_HEIGHT);
+	NSRect viewRect = NSMakeRect(0, 0, VDP_MAX_SCANLINE_WIDTH * 2, VDP_MAX_SCANLINES);
 	NSRect windowRect = NSMakeRect(NSMidX(screenRect) - NSMidX(viewRect), NSMidY(screenRect) - NSMidY(viewRect), viewRect.size.width, viewRect.size.height);
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"

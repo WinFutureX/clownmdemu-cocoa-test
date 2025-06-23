@@ -35,7 +35,7 @@
 	CGContextRef context = [[NSGraphicsContext currentContext] graphicsPort];
 #pragma clang diagnostic pop
 	CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
-	CFDataRef rgbData = CFDataCreate(NULL, (const UInt8 *) parent->emu.display, (SCREEN_WIDTH * SCREEN_HEIGHT * 4));
+	CFDataRef rgbData = CFDataCreate(NULL, (const UInt8 *) parent->emu.display, (VDP_MAX_SCANLINE_WIDTH * VDP_MAX_SCANLINES * 4));
 	CGDataProviderRef provider = CGDataProviderCreateWithCFData(rgbData);
 	CGImageRef rgbImageRef = CGImageCreate(parent->emu.width, parent->emu.height, 8, 32, (parent->emu.width * 4), colorspace, (kCGImageAlphaFirst | kCGBitmapByteOrderDefault), provider, NULL, false, kCGRenderingIntentDefault);
 	CGContextDrawImage(context, dirtyRect, rgbImageRef);
@@ -51,7 +51,7 @@
 	glRasterPos2f(-1, 1);
 	if (parent->emu.width != 0 || parent->emu.height != 0)
 	{
-		glPixelZoom((SCREEN_WIDTH_F * 2) / (float) parent->emu.width, -(SCREEN_HEIGHT_F / (float) parent->emu.height));
+		glPixelZoom(((float) VDP_MAX_SCANLINE_WIDTH * 2) / (float) parent->emu.width, -((float) VDP_MAX_SCANLINES / (float) parent->emu.height));
 		glDrawPixels(parent->emu.width, parent->emu.height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8, parent->emu.display);
 	}
 	[[self openGLContext] flushBuffer];
