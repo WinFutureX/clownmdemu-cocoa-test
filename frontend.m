@@ -134,7 +134,7 @@
 	emu.log_enabled = emu.log_enabled == cc_true ? cc_false : cc_true;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-	[sender setState:emu.log_enabled == YES ? NSOnState : NSOffState];
+	[sender setState:emu.log_enabled == cc_true ? NSOnState : NSOffState];
 #pragma clang diagnostic pop
 }
 
