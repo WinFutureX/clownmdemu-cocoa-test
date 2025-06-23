@@ -74,24 +74,46 @@ void emulator_callback_cdda_generate(void * const data, const struct ClownMDEmu 
 
 void emulator_callback_cd_seek(void * const data, const cc_u32f idx)
 {
-	// unimplemented
+	// unimplemented (for now)
+	emulator * e = (emulator *) data;
+	CDReader_SeekToSector(&e->cd_reader, idx);
 }
 
-void emulator_callback_cd_sector_read(void * const data, cc_u16l * buf)
+void emulator_callback_cd_sector_read(void * const data, cc_u16l * const buf)
 {
-	// unimplemented
+	// unimplemented (for now)
+	emulator * e = (emulator *) data;
+	CDReader_ReadSector(&e->cd_reader, buf);
 }
 
 cc_bool emulator_callback_cd_seek_track(void * const data, const cc_u16f idx, const ClownMDEmu_CDDAMode mode)
 {
-	// unimplemented
-	return cc_false;
+	// unimplemented (for now)
+	emulator * e = (emulator *) data;
+	CDReader_PlaybackSetting playback_setting;
+	switch (mode)
+	{
+		case CLOWNMDEMU_CDDA_PLAY_ALL:
+			playback_setting = CDREADER_PLAYBACK_ALL;
+			break;
+		case CLOWNMDEMU_CDDA_PLAY_ONCE:
+			playback_setting = CDREADER_PLAYBACK_ONCE;
+			break;
+		case CLOWNMDEMU_CDDA_PLAY_REPEAT:
+			playback_setting = CDREADER_PLAYBACK_REPEAT;
+			break;
+		default:
+			emulator_warn("unknown cd track playback mode");
+			return cc_false;
+	}
+	return CDReader_PlayAudio(&e->cd_reader, idx, playback_setting);
 }
 
 size_t emulator_callback_cd_audio_read(void * const data, cc_s16l * const buf, const size_t frames)
 {
-	// unimplemented
-	return 0;
+	// unimplemented (for now)
+	emulator * e = (emulator *) data;
+	return CDReader_ReadAudio(&e->cd_reader, buf, frames);
 }
 
 cc_bool emulator_callback_save_file_open_read(void * const data, const char * const filename)
@@ -143,6 +165,25 @@ void emulator_callback_log(void * const data, const char * fmt, va_list args)
 		vsprintf(buf, fmt, args);
 		printf("[emulator] %s\n", buf);
 	}
+}
+
+void emulator_callback_log_cd(void * const data, const char * const msg)
+{
+	emulator * e = (emulator *) data;
+	if (e->log_enabled == cc_true)
+	{
+		printf("[emulator] ClownCD: %s\n", msg);
+	}
+}
+
+void emulator_warn(const char * fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	printf("[emulator] warning: ");
+	vprintf(fmt, args);
+	va_end(args);
+	printf("\n");
 }
 
 void emulator_initialize(emulator * emu, void * data)
@@ -201,6 +242,9 @@ void emulator_initialize(emulator * emu, void * data)
 	ClownMDEmu_State_Initialise(&emu->state);
 	// audio engine
 	audio_initialize(&emu->audio_output);
+	// cd reader
+	ClownCD_SetErrorCallback(emulator_callback_log_cd, emu);
+	CDReader_Initialise(&emu->cd_reader);
 }
 
 void emulator_cartridge_insert(emulator * emu, uint8_t * rom, int size)
@@ -237,5 +281,6 @@ void emulator_update(emulator * emu)
 
 void emulator_shutdown(emulator * emu)
 {
+	CDReader_Deinitialise(&emu->cd_reader);
 	audio_shutdown(&emu->audio_output);
 }

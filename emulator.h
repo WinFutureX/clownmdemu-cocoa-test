@@ -5,28 +5,19 @@
 #include <stdint.h>
 
 #include "common/core/clownmdemu.h"
+#include "common/cd-reader.h"
 
 #include "audio.h"
 
 #define MAX_FILE_SIZE 8388608
-
-#define TOTAL_COLORS 16
-#define TOTAL_PALETTES 4
-#define TOTAL_BRIGHTNESS_LEVELS 3
-
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 480
-// for opengl use
-#define SCREEN_WIDTH_F 320.0
-#define SCREEN_HEIGHT_F 480.0
 
 typedef struct emulator
 {
 	void * user_data;
 	uint8_t * rom_buffer;
 	int rom_size;
-	uint32_t colors[TOTAL_COLORS * TOTAL_PALETTES * TOTAL_BRIGHTNESS_LEVELS];
-	uint32_t display[SCREEN_WIDTH * SCREEN_HEIGHT];
+	uint32_t colors[VDP_TOTAL_COLOURS];
+	uint32_t display[VDP_MAX_SCANLINE_WIDTH * VDP_MAX_SCANLINES];
 	unsigned int width;
 	unsigned int height;
 	audio audio_output;
@@ -40,6 +31,7 @@ typedef struct emulator
 	cc_bool pal;
 	cc_bool overseas;
 	cc_bool log_enabled;
+	CDReader_State cd_reader;
 }
 emulator;
 
@@ -53,7 +45,7 @@ void emulator_callback_psg_generate(void * const data, const struct ClownMDEmu *
 void emulator_callback_pcm_generate(void * const data, const struct ClownMDEmu * clownmdemu, size_t frames, void (generate_pcm_audio(const struct ClownMDEmu * clownmdemu, cc_s16l * sample_buffer, size_t total_frames)));
 void emulator_callback_cdda_generate(void * const data, const struct ClownMDEmu * clownmdemu, size_t frames, void (generate_cdda_audio(const struct ClownMDEmu * clownmdemu, cc_s16l * sample_buffer, size_t total_frames)));
 void emulator_callback_cd_seek(void * const data, const cc_u32f idx);
-void emulator_callback_cd_sector_read(void * const data, cc_u16l * buf);
+void emulator_callback_cd_sector_read(void * const data, cc_u16l * const buf);
 cc_bool emulator_callback_cd_seek_track(void * const data, const cc_u16f idx, const ClownMDEmu_CDDAMode mode);
 size_t emulator_callback_cd_audio_read(void * const data, cc_s16l * const buf, const size_t frames);
 cc_bool emulator_callback_save_file_open_read(void * const data, const char * const filename);
@@ -64,6 +56,8 @@ void emulator_callback_save_file_close(void * const data);
 cc_bool emulator_callback_save_file_remove(void * const data, const char * const filename);
 cc_bool emulator_callback_save_file_size_obtain(void * const data, const char * const filename, size_t * const size);
 void emulator_callback_log(void * const data, const char * fmt, va_list args);
+void emulator_callback_log_cd(void * const data, const char * const msg);
+void emulator_warn(const char * fmt, ...);
 
 void emulator_initialize(emulator * emu, void * data);
 void emulator_cartridge_insert(emulator * emu, uint8_t * rom, int size);
