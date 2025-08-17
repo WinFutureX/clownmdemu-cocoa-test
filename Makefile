@@ -27,27 +27,25 @@ EMU_CD_OBJS = cd-reader.o \
 	$(addprefix libraries/clownresampler/, clownresampler.o)))
 
 EMU_CORE_OBJS = $(addprefix core/, bus-common.o \
-	log.o \
-	bus-z80.o \
-	controller.o \
-	fm-phase.o \
-	pcm.o \
-	z80.o \
-	clownmdemu.o \
-	vdp.o \
 	bus-main-m68k.o \
-	fm-operator.o \
-	psg.o \
+	bus-sub-m68k.o \
+	bus-z80.o \
+	cdc.o \
+	cdda.o \
+	clownmdemu.o \
+	controller.o \
 	fm.o \
 	fm-channel.o \
 	fm-lfo.o \
 	fm-operator.o \
 	fm-phase.o \
-	bus-sub-m68k.o \
 	io-port.o \
-	cdc.o \
-	cdda.o \
+	log.o \
 	low-pass-filter.o \
+	pcm.o \
+	psg.o \
+	vdp.o \
+	z80.o \
 	$(addprefix clown68000/interpreter/, clown68000.o) \
 	$(addprefix clown68000/common/, opcode.o))
 
