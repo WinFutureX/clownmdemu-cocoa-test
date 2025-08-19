@@ -62,7 +62,7 @@ ALL_OBJS = $(addprefix common/, $(EMU_CD_OBJS) $(EMU_CORE_OBJS)) $(FRONTEND_OBJS
 all: clownmdemu
 
 clownmdemu: $(ALL_OBJS:%.o=$(OBJDIR)/%.o)
-	$(CC) $(CFLAGS) -framework Cocoa -framework OpenGL -framework AudioToolbox $^ -o $@
+	$(CC) $(CFLAGS) -framework Cocoa -framework OpenGL -framework AudioUnit $^ -o $@
 
 $(OBJDIR)/%.o: %.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@

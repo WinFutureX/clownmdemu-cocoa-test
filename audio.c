@@ -3,27 +3,6 @@
 #include "audio.h"
 #include "frontend_log.h"
 
-void audio_queue_callback(void * data, AudioQueueRef queue, AudioQueueBufferRef buffer)
-{
-	audio * a = (audio *) data;
-	if (a->shutdown == cc_true) return;
-	cc_s16l * source = &a->samples[0];
-	uint8_t * target = buffer->mAudioData;
-	if (a->paused == cc_true || a->done == cc_true || a->bytes == 0)
-	{
-		memset(target, 0, buffer->mAudioDataBytesCapacity);
-		buffer->mAudioDataByteSize = buffer->mAudioDataBytesCapacity;
-	}
-	else
-	{
-		memcpy(target, source, a->bytes);
-		buffer->mAudioDataByteSize = a->bytes;
-		a->done = cc_true;
-	}
-	OSStatus err = AudioQueueEnqueueBuffer(queue, buffer, 0, 0);
-	if (err) frontend_err("audio_queue_callback: AudioQueueEnqueueBuffer returned %d\n", err);
-}
-
 // 3732 frames for 60hz, 4433 for 50hz
 void mixer_callback(void * data, const cc_s16l * samples, size_t frames)
 {
@@ -33,14 +12,12 @@ void mixer_callback(void * data, const cc_s16l * samples, size_t frames)
 	if (frames > 0 || frames <= MIXER_MAXIMUM_AUDIO_FRAMES_PER_FRAME)
 	{
 		audio * a = (audio *) data;
-		cc_s16l * output = &a->samples[0];
 		for (int i = 0; i < frames; i++)
 		{
-			*output++ = *samples++;
-			*output++ = *samples++;
+			cc_s16l l = *samples++;
+			cc_s16l r = *samples++;
+			while(!samples_put(a, l, r));
 		}
-		a->bytes = sizeof(cc_s16l) * frames * 2;
-		a->done = cc_false;
 	}
 }
 
@@ -64,56 +41,20 @@ cc_s16l * mixer_allocate_cdda(Mixer_State * mixer, size_t frames)
 	return Mixer_AllocateCDDASamples(mixer, frames);
 }
 
-#define NUM_AUDIO_QUEUE_BUFFERS 4
-
 void audio_initialize(audio * a)
 {
 	a->has_mixer = cc_false;
-	a->has_queue = cc_false;
-}
-
-cc_bool audio_queue_initialize(audio * a, cc_bool pal)
-{
-	cc_bool ret = cc_false;
-	AudioStreamBasicDescription stream_desc;
-	stream_desc.mSampleRate = pal == cc_true ? 221650.0f : 223920.0f; // samples * frames
-	stream_desc.mFormatID = kAudioFormatLinearPCM;
-	stream_desc.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
-	stream_desc.mBitsPerChannel = 16;
-	stream_desc.mChannelsPerFrame = 2;
-	stream_desc.mFramesPerPacket = 1;
-	stream_desc.mBytesPerFrame = 4;
-	stream_desc.mBytesPerPacket = 4;
-	a->queue = 0;
-	OSStatus err = AudioQueueNewOutput(&stream_desc, &audio_queue_callback, a, 0, 0, 0, &a->queue);
-	if (err) frontend_err("audio_queue_initialize: AudioQueueNewOutput failed: %d\n", err);
-	int buffer_size = stream_desc.mBytesPerFrame * MIXER_MAXIMUM_AUDIO_FRAMES_PER_FRAME;
-	AudioQueueBufferRef audio_queue_buffers[NUM_AUDIO_QUEUE_BUFFERS];
-	for (int i = 0; i < NUM_AUDIO_QUEUE_BUFFERS; i++)
-	{
-		err = AudioQueueAllocateBuffer(a->queue, buffer_size, &audio_queue_buffers[i]);
-		if (err) frontend_err("audio_queue_initialize: AudioQueueAllocateBuffer failed for buffer %d: %d\n", i, err);
-		memset(audio_queue_buffers[i]->mAudioData, 0, audio_queue_buffers[i]->mAudioDataBytesCapacity);
-		audio_queue_buffers[i]->mAudioDataByteSize = audio_queue_buffers[i]->mAudioDataBytesCapacity;
-		err = AudioQueueEnqueueBuffer(a->queue, audio_queue_buffers[i], 0, NULL);
-		if (err) frontend_err("audio_queue_initialize: AudioQueueEnqueueBuffer failed for buffer %d: %d\n", i, err);
-	}
-	err = AudioQueueSetParameter(a->queue, kAudioQueueParam_Volume, 1.0);
-	if (err) frontend_err("audio_queue_initialize: AudioQueueSetParameter failed for parameter kAudioQueueParam_Volume: %d\n", err);
-	err = AudioQueueStart(a->queue, 0);
-	if (err) frontend_err("audio_queue_initialize: AudioQueueStart failed: %d\n", err);
-	if (!err) ret = cc_true;
-	return ret;
+	a->has_output = cc_false;
 }
 
 void audio_mixer_initialize(audio * a, cc_bool pal)
 {
-	if (a->has_queue == cc_true) audio_queue_shutdown(a);
+	if (a->has_output == cc_true) audio_unit_shutdown(a);
 	if (a->has_mixer == cc_true) Mixer_Deinitialise(&a->mixer);
 	a->pal = pal;
 	a->has_mixer = Mixer_Initialise(&a->mixer, a->pal) == cc_true ? cc_true : cc_false;
-	a->has_queue = audio_queue_initialize(a, pal);
-	a->shutdown = cc_false;
+	a->has_output = audio_unit_initialize(a, pal);
+	a->paused = cc_false;
 }
 
 void audio_mixer_begin(audio * a)
@@ -126,19 +67,119 @@ void audio_mixer_end(audio * a)
 	if (a->has_mixer == cc_true) Mixer_End(&a->mixer, mixer_callback, a);
 }
 
-void audio_queue_shutdown(audio * a)
-{
-	a->shutdown = cc_true;
-	OSStatus err = AudioQueueStop(a->queue, TRUE);
-	if (err) frontend_err("audio_queue_shutdown: AudioQueueStop failed: %d\n", err);
-	err = AudioQueueDispose(a->queue, FALSE);
-	if (err) frontend_err("audio_queue_shutdown: AudioQueueDispose failed: %d\n", err);
-	a->has_queue = cc_false;
-}
-
 void audio_shutdown(audio * a)
 {
-	if (a->has_queue == cc_true) audio_queue_shutdown(a);
+	if (a->has_output == cc_true) audio_unit_shutdown(a);
 	Mixer_Deinitialise(&a->mixer);
 	a->has_mixer = cc_false;
+}
+
+OSStatus audio_unit_callback(void * data, AudioUnitRenderActionFlags * flags, const AudioTimeStamp * time_stamp, UInt32 bus, UInt32 frames, AudioBufferList * buf_list)
+{
+	audio * a = (audio *) data;
+	SInt16 * output = (SInt16 *) buf_list->mBuffers[0].mData;
+	for (int i = 0; i < frames; i++)
+	{
+		uint32_t comb;
+		UInt32 out = i * 2;
+		if (samples_get(a, &comb) == cc_true)
+		{
+			SInt16 l = (comb & 0xFFFF0000) >> 16;
+			SInt16 r = comb;
+			output[out] = l;
+			output[out + 1] = r;
+		}
+		else
+		{
+			output[out] = 0;
+			output[out + 1] = 0;
+		}
+	}
+	return noErr;
+}
+
+cc_bool audio_unit_initialize(audio * a, cc_bool pal)
+{
+	OSErr err;
+	AudioComponentDescription acd;
+	acd.componentType = kAudioUnitType_Output;
+	acd.componentSubType = kAudioUnitSubType_DefaultOutput;
+	acd.componentManufacturer = kAudioUnitManufacturer_Apple;
+	AudioComponent c = AudioComponentFindNext(NULL, &acd);
+	if (!c)
+	{
+		frontend_err("AudioComponentFindNext failed\n");
+		return cc_false;
+	}
+	err = AudioComponentInstanceNew(c, &a->au);
+	if (err)
+	{
+		frontend_err("AudioComponentInstanceNew failed: %d\n", err);
+		return cc_false;
+	}
+	AURenderCallbackStruct aurcs;
+	aurcs.inputProc = audio_unit_callback;
+	aurcs.inputProcRefCon = a;
+	err = AudioUnitSetProperty(a->au, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &aurcs, sizeof(aurcs));
+	if (err)
+	{
+		frontend_err("AudioUnitSetProperty failed for kAudioUnitProperty_SetRenderCallback: %d\n", err);
+		return cc_false;
+	}
+	AudioStreamBasicDescription asbd;
+	asbd.mFormatID = kAudioFormatLinearPCM;
+	asbd.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
+	//asbd.mSampleRate = pal == cc_true ? 221650.0f : 223920.0f;
+	asbd.mSampleRate = MIXER_OUTPUT_SAMPLE_RATE;
+	asbd.mBitsPerChannel = 16;
+	asbd.mChannelsPerFrame = 2;
+	asbd.mFramesPerPacket = 1;
+	asbd.mBytesPerFrame = 4;
+	asbd.mBytesPerPacket = 4;
+	err = AudioUnitSetProperty(a->au, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &asbd, sizeof(asbd));
+	if (err)
+	{
+		frontend_err("AudioUnitSetProperty failed for kAudioUnitProperty_StreamFormat: %d\n", err);
+		return cc_false;
+	}
+	err = AudioUnitInitialize(a->au);
+	if (err)
+	{
+		frontend_err("AudioUnitInitialize failed: %d\n", err);
+		return cc_false;
+	}
+	AudioOutputUnitStart(a->au);
+	return cc_true;
+}
+
+void audio_unit_shutdown(audio * a)
+{
+	AudioOutputUnitStop(a->au);
+	AudioUnitUninitialize(a->au);
+	AudioComponentInstanceDispose(a->au);
+}
+
+cc_bool samples_put(audio * a, cc_s16l l, cc_s16l r)
+{
+	uint32_t tmp = (uint32_t) (l << 16) | (uint32_t) r;
+	if (a->samples_head == (a->samples_tail - 1 + SAMPLE_BUF_SIZE) % SAMPLE_BUF_SIZE)
+	{
+		//frontend_err("samples_put: full\n");
+		return cc_false;
+	}
+	a->samples_buf[a->samples_head] = tmp;
+	a->samples_head = (a->samples_head + 1) % SAMPLE_BUF_SIZE;
+	return cc_true;
+}
+
+cc_bool samples_get(audio * a, uint32_t * out)
+{
+	if (a->samples_head == a->samples_tail)
+	{
+		//frontend_err("samples_get: empty\n");
+		return cc_false;
+	}
+	*out = a->samples_buf[a->samples_tail];
+	a->samples_tail = (a->samples_tail + 1) % SAMPLE_BUF_SIZE;
+	return cc_true;
 }
